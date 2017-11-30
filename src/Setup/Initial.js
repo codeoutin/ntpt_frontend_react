@@ -2,81 +2,115 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
 export class Initial extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isToggleOn: true,
+            username: "pse",
+            password: "berlin",
+            server: "127.0.0.1:8080"
+        };
+
+        // This binding is necessary to make `this` work in the callback
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    handleClick() {
+        this.setState(prevState => ({
+            isToggleOn: !prevState.isToggleOn
+        }));
+    }
+
+
+
+
+    checkConnection(event) {
+        //var url = this.server + '/engine-rest/engine/default/task/count';
+
+        // New XMLHTTPRequest
+        //var request = new XMLHttpRequest();
+        //request.open("GET", url, false);
+        //request.setRequestHeader("Authorization", this.authenticateUser(username, password));
+        //request.send();
+        // view request status
+        alert(event.target.password.value + event.target.username.value );
+        //alert(request.responseText);
+    }
+
+    authenticateUser(username, password) {
+        var token = password + ":" + password;
+        var hash = btoa(token);
+        return "Basic " + hash;
+    }
+
+
+    renderCamundaSetup() {
+        return (
+            <form onSubmit={this.checkConnection}>
+                <fieldset>
+                    <legend>Camunda Server</legend>
+                    <div className="form-group">
+                        <p>First you have to connect to the Camunda Server</p>
+                        <label for="inputCamundaServer">Server-Adress</label>
+                        <input type="text" name="server" className="form-control" id="inputCamundaServer" aria-describedby="camundaServerHelp" placeholder="127.0.0.1:8080" />
+                        <small id="camundaServerHelp" className="form-text text-muted">Make sure the server is running.</small>
+                    </div>
+                    <div className="form-group">
+                        <label for="inputCamundaLogin">Login</label>
+                        <input type="text" name="username" className="form-control" id="inputCamundaLogin" />
+                    </div>
+                    <div className="form-group">
+                        <label for="inputCamundaPw">Password</label>
+                        <input type="password" name="password" className="form-control" id="inputCamundaPw" />
+                    </div>
+                    <button type="submit" className="btn btn-warning">Connect</button>
+
+                </fieldset>
+            </form>
+        )
+    }
+
+    renderApiServers() {
+        return (
+            <form>
+                <fieldset>
+                    <legend>Additional Servers</legend>
+                    <div className="form-group">
+                        <label for="inputJenkinsServer">Jenkins Server</label>
+                        <input type="text" className="form-control" id="inputJenkinsServer" aria-describedby="jenkinsServerHelp" placeholder="127.0.0.1:8001" />
+                    </div>
+
+                    <div className="form-group">
+                        <label for="inputGitLabServer">Gitlab Server</label>
+                        <input type="text" className="form-control" id="inputGitlabServer" aria-describedby="gitlabServerHelp" placeholder="127.0.0.1:8002" />
+                    </div>
+
+                    <div className="form-group">
+                        <label for="inputMongoDBServer">MongoDB Server</label>
+                        <input type="text" className="form-control" id="inputMongoDBServer" aria-describedby="mongoDBServerHelp" placeholder="127.0.0.1:8003" />
+                    </div>
+
+                    <div className="form-group">
+                        <label for="inputSonarqubeServer">MongoDB Server</label>
+                        <input type="text" className="form-control" id="inputSonarqubeServer" aria-describedby="sonarqubeServerHelp" placeholder="127.0.0.1:8004" />
+                    </div>
+                    <div className="row xs-5">
+                        <button type="submit" className="btn btn-success">Test Connections</button>
+                        <button type="submit" className="btn btn-submit">Save</button>
+                    </div>
+                </fieldset>
+            </form>
+        );
+    }
+
     render() {
         return (
             <div className="container">
                 <h3>Server Setup</h3>
-                <form>
-                    <fieldset>
-                        <legend>Legend</legend>
-                        <div className="form-group">
-                            <label for="exampleInputEmail1">Email address</label>
-                            <input type="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" />
-                            <small id="emailHelp" className="form-text text-muted">We'll never share your email with anyone else.</small>
-                        </div>
-                        <div className="form-group">
-                            <label for="exampleInputPassword1">Password</label>
-                            <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" />
-                        </div>
-                        <div className="form-group">
-                            <label for="exampleSelect1">Example select</label>
-                            <select className="form-control" id="exampleSelect1">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label for="exampleSelect2">Example multiple select</label>
-                            <select multiple="" className="form-control" id="exampleSelect2">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label for="exampleTextarea">Example textarea</label>
-                            <textarea className="form-control" id="exampleTextarea" rows="3"></textarea>
-                        </div>
-                        <div className="form-group">
-                            <label for="exampleInputFile">File input</label>
-                            <input type="file" className="form-control-file" id="exampleInputFile" aria-describedby="fileHelp" />
-                            <small id="fileHelp" className="form-text text-muted">This is some placeholder block-level help text for the above input. It's a bit lighter and easily wraps to a new line.</small>
-                        </div>
-                        <fieldset className="form-group">
-                            <legend>Radio buttons</legend>
-                            <div className="form-check">
-                                <label className="form-check-label">
-                                    <input type="radio" className="form-check-input" name="optionsRadios" id="optionsRadios1" value="option1" checked="" />
-                                    Option one is this and that—be sure to include why it's great
-                            </label>
-                            </div>
-                            <div className="form-check">
-                                <label className="form-check-label">
-                                    <input type="radio" className="form-check-input" name="optionsRadios" id="optionsRadios2" value="option2" />
-                                    Option two can be something else and selecting it will deselect option one
-                            </label>
-                            </div>
-                            <div className="form-check disabled">
-                                <label className="form-check-label">
-                                    <input type="radio" className="form-check-input" name="optionsRadios" id="optionsRadios3" value="option3" disabled="" />
-                                    Option three is disabled
-                            </label>
-                            </div>
-                        </fieldset>
-                        <div className="form-check">
-                            <label className="form-check-label">
-                                <input type="checkbox" className="form-check-input" />
-                                Check me out
-                        </label>
-                        </div>
-                        <button type="submit" className="btn btn-primary">Submit</button>
-                    </fieldset>
-                </form>
+                <button onClick={this.handleClick}>
+                    Switch
+                </button>
+                {this.state.isToggleOn ? this.renderCamundaSetup() : this.renderApiServers()}
             </div>
         );
     }
