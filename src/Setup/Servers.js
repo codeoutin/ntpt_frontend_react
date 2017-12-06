@@ -6,6 +6,7 @@ export class Servers extends Component {
         this.state = {
             jenkinsServer: "127.0.0.1:8001",
             gitlabServer: "127.0.0.1:8002",
+            gitlabToken: "",
             mongodbServer: "127.0.0.1:8003",
             sonarqubeServer: "127.0.0.1:8004"
         };
@@ -15,21 +16,15 @@ export class Servers extends Component {
     }
 
     handleChange(event) {
-        this.setState({value: event.target.value});
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
+        this.setState({[name]: value});
     }
 
-
     checkConnection(event) {
-        //var url = this.server + '/engine-rest/engine/default/task/count';
-
-        // New XMLHTTPRequest
-        //var request = new XMLHttpRequest();
-        //request.open("GET", url, false);
-        //request.setRequestHeader("Authorization", this.authenticateUser(username, password));
-        //request.send();
-        // view request status
         alert(event.target.jenkinsServer.value + "-" +event.target.gitlabServer.value + "-" + event.target.mongodbServer.value + "-" + event.target.sonarqubeServer.value );
-        //alert(request.responseText);
+        
     }
 
     authenticateUser(username, password) {
@@ -41,6 +36,8 @@ export class Servers extends Component {
     renderApiServers() {
         return (
             <form onSubmit={this.checkConnection}>
+                <h4>gitlab: {this.state.gitlabServer}</h4>
+                <h4>gitlab token: {this.state.gitlabToken}</h4>
                 <fieldset>
                     <legend>Additional Servers</legend>
                     <div className="form-group">

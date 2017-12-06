@@ -6,7 +6,6 @@ export class Instances extends Component {
     super(props);
     this.state = {
       runningInstances: [],
-      runningInstancesCount: 0,
       gitlabProjects: []
     };
   }
@@ -19,13 +18,7 @@ export class Instances extends Component {
     fetch('http://localhost:8080/rest/process-instance/')
     .then(result=>result.json())
     .then(runningInstances=>this.setState({runningInstances}));
-
-    fetch('http://localhost:8080/rest/process-instance/count')
-    .then(result=>result.json())
-    .then(responseJson => this.setState({runningInstancesCount: responseJson.count}));
   }
-
-
 
   createInstance(event) {
     event.preventDefault();
@@ -46,7 +39,6 @@ export class Instances extends Component {
 
     var jsonPost = JSON.stringify(instance);
     var resultId = "";
-    var prevInstanceCount = this.state.runningInstancesCount;
 
     fetch('http://localhost:8080/rest/process-definition/key/TestBuildPipeline/submit-form', {
       method: 'post',
@@ -59,12 +51,7 @@ export class Instances extends Component {
     .then(res => res.json())
     .then(res => resultId = res.id)
     .then(res => this.refs.alert.generateAlert("New Instance Created", "Instance ID " + resultId + " created", "success"))
-    .then(this.instanceForm.reset())
-    .then(this.setState({runningInstancesCount: prevInstanceCount + 1}));
-
-    fetch('http://localhost:8080/rest/process-instance/')
-    .then(result=>result.json())
-    .then(runningInstances=>this.setState({runningInstances}));
+    .then(this.instanceForm.reset());
   }
 
   render() {
@@ -72,7 +59,7 @@ export class Instances extends Component {
       <div>
         {this.state.runningInstances.length > 0 &&
           <div className="container">
-            <h3>Running Instances ({this.state.runningInstancesCount})</h3>
+            <h3>Running Instances ({this.state.runningInstances.length})</h3>
             <ul>
               {this.state.runningInstances.map(runningInstances=> {
                 if(!runningInstances.ended) {
@@ -85,7 +72,7 @@ export class Instances extends Component {
           </div>
         }
         
-
+        <h4>gitlab server {this.props.servers.gitlabServer}</h4>
 
         <div className="container">
           <h3>Request new Instance</h3>
@@ -100,12 +87,15 @@ export class Instances extends Component {
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Select a Project</label>
-              <select ref={(input) => this.gitlabProject = input} className="form-control" id="gitlabProject">
-                {this.state.gitlabProjects.map(gitlabProjects=><option key={gitlabProjects.id} value={gitlabProjects.id}>{gitlabProjects.name}</option>)}
-              </select>
-            </div>
+            
+            {this.state.gitlabProjects.length > 0 &&
+              <div className="form-group">
+                <label>Select a Project</label>
+                <select ref={(input) => this.gitlabProject = input} className="form-control" id="gitlabProject">
+                  {this.state.gitlabProjects.map(gitlabProjects=><option key={gitlabProjects.id} value={gitlabProjects.id}>{gitlabProjects.name}</option>)}
+                </select>
+              </div>
+            }              
 
             <div className="form-group">
               <div className="form-check">
