@@ -1,176 +1,143 @@
 import React, { Component } from 'react';
 
-
 export class Instances extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {gitlabProjects: []};
+  }
+
+  componentDidMount() {
+    fetch('http://localhost:8002/api/v4/projects?private_token=wAdcZ3ZnnRcc5dk7Wwyn')
+    .then(result=>result.json())
+    .then(gitlabProjects=>this.setState({gitlabProjects}))
+  }
+
+  createInstance(event) {
+    event.preventDefault();
+    const instance = {
+      variables: {
+        additionalArtifacts: {value: this.additionalArtifacts.checked, type: "Boolean"},
+        additionalArtifactsDesc: {value: this.additionalArtifactsDesc.value, type: "String"},
+        branch_name: {value: this.branch_name.value, type: "String"},
+        branchType: {value: this.branchType.value, type: "String"},
+        buildPipeline: {value: this.buildPipeline.checked, type: "Boolean"},
+        database: {value: this.database.checked, type: "Boolean"},
+        gitlabProject: {value: this.gitlabProject.value, type: "String"},
+        schemaType: {value: this.schemaType.value, type: "String"},
+        sonarqubeProfile: {value: this.sonarqubeProfile.value, type: "String"},
+        testEnv: {value: this.testEnv.checked, type: "Boolean"},
+      }
+    }
+
+    var jsonPost = JSON.stringify(instance);
+    console.log(jsonPost);
+
+    fetch('http://localhost:8080/rest/process-definition/key/TestBuildPipeline/submit-form', {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type':'application/json'
+      },
+      body: jsonPost
+    })
+    .then(res => res.json())
+    .then(res => console.log(res));
+  }
+
   render() {
     return (
       <div className="container">
         <h3>Request new Instance</h3>
-        <form>
-
-        <form role="form" className="form-horizontal">
-          <div className="control-group">
+        <form className="form-horizontal" onSubmit={(e) => this.createInstance(e)}>
+          
+          <div className="form-group">
             <label className="control-label">Branch Name</label>
             <div className="controls">
-              <input required type="text" className="form-control"
-                cam-variable-name="branch_name" cam-variable-type="String"
-                placeholder="ABCD" ng-minlength="2" ng-maxlength="20" />
+              <input ref={(input) => this.branch_name = input} required type="text" className="form-control"
+                name="branch_name" placeholder="ABCD" />
             </div>
           </div>
 
-          <div className="control-group">
-            <label className="control-label">MySQL Database</label>
-            <div className="controls">
-              <input type="checkbox" className="form-control"
-                cam-variable-name="database" cam-variable-type="Boolean" />
-            </div>
+          <div className="form-group">
+            <label>Select a Project</label>
+            <select ref={(input) => this.gitlabProject = input} className="form-control" id="gitlabProject">
+              {this.state.gitlabProjects.map(gitlabProjects=><option key={gitlabProjects.id} value={gitlabProjects.id}>{gitlabProjects.name}</option>)}
+            </select>
           </div>
 
-          <div className="control-group">
-            <label className="control-label">Build Pipeline</label>
-            <div className="controls">
-              <input type="checkbox" className="form-control"
-                cam-variable-name="buildPipeline" cam-variable-type="Boolean" />
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">Branch Type</label>
-            <div className="controls">
-              <select cam-variable-name="branchType" cam-variable-type="String">
-                <option value="release">RELEASE</option>
-                <option value="hotfix">HOTFIX</option>
-                <option value="feature">FEATURE</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">SonarQube (QA)</label>
-            <div className="controls">
-              <select cam-variable-name="schemaType" cam-variable-type="String">
-                <option value="runtime">RUNTIME</option>
-                <option value="unittest">UNITTEST</option>
-                <option value="all">ALL</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">Project</label>
-            <div className="controls">
-              <select cam-variable-name="project" cam-variable-type="String">
-              </select>
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">SonarQube (QA)</label>
-            <div className="controls">
-              <select cam-variable-name="sonarqubeProfile"
-                cam-variable-type="String">
-                <option value="no">No QA</option>
-                <option value="profile1">Profile 1</option>
-                <option value="profile2">Profile 2</option>
-                <option value="profile3">Profile 3</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">Test Environment</label>
-            <div className="controls">
-              <input type="checkbox" className="form-control"
-                cam-variable-name="testEnv" cam-variable-type="Boolean" />
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">Additional Artifacts needed?</label>
-            <div className="controls">
-              <input type="checkbox" className="form-control"
-                cam-variable-name="additionalArtifacts" cam-variable-type="Boolean" />
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">What do you need?</label>
-            <div className="controls">
-              <textarea className="form-control"
-                cam-variable-name="additionalArtifactsDesc"
-                cam-variable-type="String" rows="4"></textarea>
-            </div>
-          </div>
-
-        </form>
-
-
-
-
-          <hr />
-          <fieldset>
-            <div className="form-group">
-              <label for="exampleInputPassword1">Password</label>
-              <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" />
-            </div>
-            <div className="form-group">
-              <label for="exampleSelect1">Example select</label>
-              <select className="form-control" id="exampleSelect1">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label for="exampleSelect2">Example multiple select</label>
-              <select multiple="" className="form-control" id="exampleSelect2">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label for="exampleTextarea">Example textarea</label>
-              <textarea className="form-control" id="exampleTextarea" rows="3"></textarea>
-            </div>
-            <div className="form-group">
-              <label for="exampleInputFile">File input</label>
-              <input type="file" className="form-control-file" id="exampleInputFile" aria-describedby="fileHelp" />
-              <small id="fileHelp" className="form-text text-muted">This is some placeholder block-level help text for the above input. It's a bit lighter and easily wraps to a new line.</small>
-            </div>
-            <fieldset className="form-group">
-              <legend>Radio buttons</legend>
-              <div className="form-check">
-                <label className="form-check-label">
-                  <input type="radio" className="form-check-input" name="optionsRadios" id="optionsRadios1" value="option1" checked="" />
-                  Option one is this and that—be sure to include why it's great
-                            </label>
-              </div>
-              <div className="form-check">
-                <label className="form-check-label">
-                  <input type="radio" className="form-check-input" name="optionsRadios" id="optionsRadios2" value="option2" />
-                  Option two can be something else and selecting it will deselect option one
-                            </label>
-              </div>
-              <div className="form-check disabled">
-                <label className="form-check-label">
-                  <input type="radio" className="form-check-input" name="optionsRadios" id="optionsRadios3" value="option3" disabled="" />
-                  Option three is disabled
-                            </label>
-              </div>
-            </fieldset>
+          <div className="form-group">
             <div className="form-check">
               <label className="form-check-label">
-                <input type="checkbox" className="form-check-input" />
-                Check me out
-                        </label>
+                <input ref={(input) => this.database = input} type="checkbox" className="form-check-input" name="database"/>
+                MySQL Database
+              </label>
             </div>
-            <button type="submit" className="btn btn-primary">Submit</button>
-          </fieldset>
+          </div>
+
+          <div className="form-group">
+            <div className="form-check">
+              <label className="form-check-label">
+                <input ref={(input) => this.buildPipeline = input} type="checkbox" className="form-check-input" name="buildPipeline"/>
+                Build Pipeline
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Select a Branch Type</label>
+            <select ref={(input) => this.branchType = input} className="form-control" id="branchType">
+              <option value="RELEASE">Release</option>
+              <option value="HOTFIX">Hotfix</option>
+              <option value="FEATURE">Feature</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Select a Schema Type</label>
+            <select ref={(input) => this.schemaType = input} className="form-control" id="schemaType">
+              <option value="RUNTIME">Runtime</option>
+              <option value="UNITTEST">Unit Test</option>
+              <option value="ALL">All</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Select a SonarQube (QA) Profile</label>
+            <select ref={(input) => this.sonarqubeProfile = input} className="form-control" id="sonarqubeProfile">
+              <option value="no">No QA</option>
+              <option value="profile1">Profile 1</option>
+              <option value="profile2">Profile 2</option>
+              <option value="profile3">Profile 3</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <div className="form-check">
+              <label className="form-check-label">
+                <input ref={(input) => this.testEnv = input} type="checkbox" className="form-check-input" name="testEnv"/>
+                Create Test Environment
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <div className="form-check">
+              <label className="form-check-label">
+                <input ref={(input) => this.additionalArtifacts = input} type="checkbox" className="form-check-input" name="additionalArtifacts"/>
+                Create additional Artifacts
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="control-label">Describe what you need</label>
+            <div className="controls">
+              <textarea ref={(input) => this.additionalArtifactsDesc = input} className="form-control"
+                rows="4"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" className="btn btn-primary">Create Instance</button>
         </form>
       </div>
     );
