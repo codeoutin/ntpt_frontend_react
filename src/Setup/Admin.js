@@ -5,7 +5,7 @@ export class Admin extends Component {
   render() {
     return (
       <div className="container">
-        <h3>Create Admin Login</h3>
+        <h3>Create Admin Login {this.props.arsch}</h3>
         <form>
           <fieldset>
             <legend>Legend</legend>
