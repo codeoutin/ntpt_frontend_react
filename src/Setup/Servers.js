@@ -4,11 +4,6 @@ export class Servers extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            jenkinsServer: "127.0.0.1:8001",
-            gitlabServer: "127.0.0.1:8002",
-            gitlabToken: "",
-            mongodbServer: "127.0.0.1:8003",
-            sonarqubeServer: "127.0.0.1:8004"
         };
 
         // This binding is necessary to make `this` work in the callback
@@ -36,30 +31,30 @@ export class Servers extends Component {
     renderApiServers() {
         return (
             <form onSubmit={this.checkConnection}>
-                <h4>gitlab: {this.state.gitlabServer}</h4>
-                <h4>gitlab token: {this.state.gitlabToken}</h4>
+                <h4>gitlab: {this.props.servers.gitlabServer}</h4>
+                <h4>gitlab token: {this.props.gitlabToken}</h4>
                 <fieldset>
                     <legend>Additional Servers</legend>
                     <div className="form-group">
                         <label>Jenkins Server</label>
-                        <input type="text" className="form-control" name="jenkinsServer" id="inputJenkinsServer" defaultValue={this.state.jenkinsServer} onChange={this.handleChange} />
+                        <input type="text" className="form-control" name="jenkinsServer" id="inputJenkinsServer" defaultValue={this.props.servers.jenkinsServer} onChange={this.props.changeJenkinsServer} />
                     </div>
 
                     <div className="form-group">
                         <label>Gitlab Server</label>
-                        <input type="text" className="form-control" name="gitlabServer" id="inputGitlabServer" defaultValue={this.state.gitlabServer} onChange={this.handleChange} />
+                        <input type="text" className="form-control" name="gitlabServer" id="inputGitlabServer" defaultValue={this.props.servers.gitlabServer} onChange={this.props.changeGitlabServer} />
                         <br />
-                        <input type="text" className="form-control" name="gitlabToken" id="inputGitlabToken" placeholder="Personal Access Token" onChange={this.handleChange} />
+                        <input type="text" className="form-control" name="gitlabToken" id="inputGitlabToken" placeholder="Personal Access Token" onChange={this.props.changeGitlabToken} />
                     </div>
 
                     <div className="form-group">
                         <label>MongoDB Server</label>
-                        <input type="text" className="form-control" name="mongodbServer" id="inputMongoDBServer" defaultValue={this.state.mongodbServer} onChange={this.handleChange} />
+                        <input type="text" className="form-control" name="mongodbServer" id="inputMongoDBServer" defaultValue={this.props.servers.mongodbServer} onChange={this.props.changeMongodbServer} />
                     </div>
 
                     <div className="form-group">
                         <label>SonarQube Server</label>
-                        <input type="text" className="form-control" name="sonarqubeServer" id="inputSonarqubeServer" defaultValue={this.state.sonarqubeServer} onChange={this.handleChange} />
+                        <input type="text" className="form-control" name="sonarqubeServer" id="inputSonarqubeServer" defaultValue={this.props.servers.sonarqubeServer} onChange={this.props.changeSonarqubeServer} />
                     </div>
                     <div className="row xs-5">
                         <button type="submit" className="btn btn-success">Test Connections</button>
