@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Alert } from '../Layout/Alert';
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
 
 export class Instances extends Component {
   constructor(props) {
@@ -8,6 +10,8 @@ export class Instances extends Component {
       runningInstances: [],
       gitProjects: [],
       gitCommits: [],
+      selectedProject: '',
+      selectedCommit: '',
       camundaEngine: [],
       BP: false,
       DB: false,
@@ -16,7 +20,7 @@ export class Instances extends Component {
     this.handleBP = this.handleBP.bind(this);
     this.handleDB = this.handleDB.bind(this);
     this.handleAddArtifacts = this.handleAddArtifacts.bind(this);
-    this.changeProject = this.changeProject.bind(this);
+    //this.changeProject = this.changeProject.bind(this);
   }
 
   componentDidMount() {
@@ -37,19 +41,19 @@ export class Instances extends Component {
   handleDB(e) {this.setState({DB: !this.state.DB})}
   handleAddArtifacts(e) {this.setState({AddArtifacts: !this.state.AddArtifacts})}
 
-  changeProject(e) {
-    const projectId = e.target.value;
-    fetch('http://' + this.props.servers.gitlabServer + '/api/v4/projects/'+ projectId +'/repository/commits', 
-    {headers: {'PRIVATE-TOKEN': this.props.servers.gitlabToken}})
-    .then(result=>result.json())
-    .then(gitCommits=>this.setState({gitCommits}));
-  }
-
   createInstance(e) {
     e.preventDefault();
+    var project_name;
+    for(var i = 0; i < this.state.gitProjects.length; i++) {
+      if(this.state.gitProjects[i].id == this.git_project.value) {
+        project_name = this.state.gitProjects[i].name;
+        console.log(project_name);
+      }
+    }
+
     var instance = {
       variables: {
-        //prefix: {value:  + "_" + this.git_branch_name.value , type: "String"},
+        prefix: {value: project_name + "_" + this.git_branch_name.value , type: "String"},
 
         additional_artifacts: {value: this.state.AddArtifacts, type: "Boolean"}, //input
         additional_artifacts_text: (this.state.AddArtifacts ? {value: this.additional_artifacts_text.value, type: "String"} : undefined), //input
@@ -74,7 +78,7 @@ export class Instances extends Component {
     }
 
     var jsonPost = JSON.stringify(instance);
-    console.log(jsonPost);
+    //console.log(jsonPost);
     var resultId = "";
 
     fetch('http://localhost:8080/rest/process-definition/key/TestBuildPipeline/submit-form', {
@@ -91,7 +95,32 @@ export class Instances extends Component {
     .then(this.instanceForm.reset());
   }
 
+  //for react-select:
+  handleProjectChange = (selectedProject) => {
+    this.setState({ selectedProject });
+    const projectId = selectedProject.value;
+    fetch('http://' + this.props.servers.gitlabServer + '/api/v4/projects/'+ projectId +'/repository/commits', 
+    {headers: {'PRIVATE-TOKEN': this.props.servers.gitlabToken}})
+    .then(result=>result.json())
+    .then(gitCommits=>this.setState({gitCommits}));
+  }
+
+  handleCommitChange = (selectedCommit) => {
+    this.setState({ selectedCommit });
+    console.log("selected: ${selectedCommit.title}")
+  }
+
   render() {
+    const getProjects = this.state.gitProjects.map (project => ({ 
+      value: project.id, 
+      label: project.path_with_namespace
+    }));
+
+    const getCommits = this.state.gitCommits.map (commit => ({ 
+      value: commit.id, 
+      label: '['+ commit.short_id+'] ' + commit.title
+    }));
+
     return (
       <div>
         {this.state.camundaEngine.length === 0 && 
@@ -136,19 +165,50 @@ export class Instances extends Component {
             {this.state.gitProjects.length > 0 &&
               <div className="form-group">
                 <label>Select a Project</label>
-                <select ref={(input) => this.git_project = input} className="form-control" id="git_project" onChange={this.changeProject}>
-                  {this.state.gitProjects.map(gitProjects => <option key={gitProjects.name} value={gitProjects.id}>{gitProjects.name}</option>)}
-                </select>
+                <Select 
+                  required
+                  //ref={(input) => this.git_project = input} 
+                  id="git_project" 
+                  value={this.state.selectedProject}
+                  onChange={this.handleProjectChange}
+                  options={getProjects}
+                />
               </div>
             }
 
-            <div className="form-group">
-              <label>Select a Commit</label>
-              <select ref={(input) => this.git_commit = input} className="form-control" id="git_commit">
-                {this.state.gitCommits.map(gitCommits=><option key={gitCommits.short_id} value={gitCommits.short_id}>[{gitCommits.short_id}] {gitCommits.title}</option>)}
-                <option value="HEAD">HEAD</option>
-              </select>
-            </div> 
+            {/* {this.state.gitProjects.length > 0 &&
+              <div className="form-group">
+                <label>Select a Project</label>
+                <select required ref={(input) => this.git_project = input} className="form-control" id="git_project" onChange={this.changeProject}>
+                  <option value="" disabled selected>Select a Project</option>
+                  {this.state.gitProjects.map(gitProjects => <option key={gitProjects.name} value={gitProjects.id}>{gitProjects.name}</option>)}
+                </select>
+              </div>
+            } */}
+
+            {this.state.gitCommits.length > 0 && 
+              <div className="form-group">
+                <label>Select a Commit</label>
+                <Select 
+                  name="git_commit"
+                  id="git_commit"
+                  value={this.state.selectedCommit}
+                  //ref={(input) => this.git_commit = input} 
+                  onChange = {this.handleCommitChange}
+                  options={getCommits}
+                />
+              </div> 
+            }
+
+            {/* {this.state.gitCommits.length > 0 && 
+              <div className="form-group">
+                <label>Select a Commit</label>
+                <select ref={(input) => this.git_commit = input} className="form-control" id="git_commit">
+                  {this.state.gitCommits.map(gitCommits=><option key={gitCommits.short_id} value={gitCommits.short_id}>[{gitCommits.short_id}] {gitCommits.title}</option>)}
+                  <option value="HEAD">HEAD</option>
+                </select>
+              </div> 
+            } */}
 
             {/* Database */}
             <div className="form-group">
