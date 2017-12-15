@@ -24,17 +24,29 @@ export class Instances extends Component {
   }
 
   componentDidMount() {
-    fetch('http://' + this.props.servers.gitlabServer + '/api/v4/projects?private_token=' + this.props.servers.gitlabToken)
-    .then(result=>result.json())
-    .then(gitProjects=>this.setState({gitProjects}));
+    const gitUrl = 'http://' + this.props.servers.gitlabServer;
+    const camundaUrl = 'http://' + this.props.servers.camundaServer;
 
-    fetch('http://' + this.props.servers.camundaServer + '/rest/process-instance/')
-    .then(result=>result.json())
-    .then(runningInstances=>this.setState({runningInstances}));
+    fetch(gitUrl + '/api/v4/projects?private_token=' + this.props.servers.gitlabToken)
+    .then(result => result.json())
+    .then(gitProjects => this.setState({gitProjects}))
+    .catch(error => {
+      this.refs.alert.generateAlert("Connection failed", "Failed to connect to GitLab Server. Check Server Page.", "warning");
+    });
 
-    fetch('http://' + this.props.servers.camundaServer + '/rest/engine/')
-    .then(result=>result.json())
-    .then(camundaEngine=>this.setState({camundaEngine}));
+    fetch(camundaUrl + '/rest/process-instance/')
+    .then(result => result.json())
+    .then(runningInstances => this.setState({runningInstances}))
+    .catch(error => {
+      this.refs.alert.generateAlert("Connection failed", "Failed to connect to Camunda Server. Check Server Page.", "warning");
+    });
+
+    fetch(camundaUrl + '/rest/engine/')
+    .then(result => result.json())
+    .then(camundaEngine => this.setState({camundaEngine}))
+    .catch(error => {
+      this.refs.alert.generateAlert("Connection failed", "Failed to connect to Camunda Server. Check Server Page.", "warning");
+    });
   }
 
   handleBP(e) {this.setState({BP: !this.state.BP})}
@@ -43,14 +55,17 @@ export class Instances extends Component {
 
   createInstance(e) {
     e.preventDefault();
+    console.log(this.state.selectedProject.value);
+    //used for prefix
     var project_name;
     for(var i = 0; i < this.state.gitProjects.length; i++) {
-      if(this.state.gitProjects[i].id == this.git_project.value) {
+      if(this.state.gitProjects[i].id == this.state.selectedProject.value) {
         project_name = this.state.gitProjects[i].name;
-        console.log(project_name);
       }
     }
+    console.log(project_name);
 
+    //create camunda-variables
     var instance = {
       variables: {
         prefix: {value: project_name + "_" + this.git_branch_name.value , type: "String"},
@@ -66,8 +81,8 @@ export class Instances extends Component {
 
         git_branch_name: {value: this.git_branch_name.value, type: "String"}, //input
         git_token: {value: this.props.servers.gitlabToken, type: "String"},
-        git_project: {value: this.git_project.value, type: "String"}, //input
-        git_commit: {value: this.git_commit.value, type: "String"}, //input
+        git_project: {value: this.state.selectedProject.value, type: "String"}, //input
+        git_commit: {value: this.state.selectedCommit.value, type: "String"}, //input
         git_url: {value: this.props.servers.gitlabServer, type: "String"},
 
         sonarqube_profile: {value: this.sonarqube_profile.value, type: "String"}, //input
@@ -77,10 +92,12 @@ export class Instances extends Component {
       }
     }
 
+    //generate json object out of instance object
     var jsonPost = JSON.stringify(instance);
     //console.log(jsonPost);
     var resultId = "";
 
+    //connect to camunda engine
     fetch('http://localhost:8080/rest/process-definition/key/TestBuildPipeline/submit-form', {
       method: 'post',
       headers: {
@@ -95,7 +112,7 @@ export class Instances extends Component {
     .then(this.instanceForm.reset());
   }
 
-  //for react-select:
+  //for react-select
   handleProjectChange = (selectedProject) => {
     this.setState({ selectedProject });
     const projectId = selectedProject.value;
@@ -107,8 +124,9 @@ export class Instances extends Component {
 
   handleCommitChange = (selectedCommit) => {
     this.setState({ selectedCommit });
-    console.log("selected: ${selectedCommit.title}")
+    //console.log("selected: ${selectedCommit.title}")
   }
+  //end
 
   render() {
     const getProjects = this.state.gitProjects.map (project => ({ 
@@ -120,6 +138,7 @@ export class Instances extends Component {
       value: commit.id, 
       label: '['+ commit.short_id+'] ' + commit.title
     }));
+    getCommits.push({value: 'HEAD', label: 'HEAD'});
 
     return (
       <div>
@@ -135,13 +154,11 @@ export class Instances extends Component {
           <div className="container">
             <h3>Running Instances ({this.state.runningInstances.length})</h3>
             <ul>
-              {this.state.runningInstances.map(runningInstances=>{
-                if(!runningInstances.ended) {
-                  return 
-                  <li key={runningInstances.id}>
-                    <a href={`http://localhost:8080/app/cockpit/default/#/process-instance/${runningInstances.id}`} target="_blank">{runningInstances.id}</a>
-                  </li>
-                }
+              {this.state.runningInstances.map(instance=>{
+                return <li key={instance.id}>
+                  <a href={`http://localhost:8080/app/cockpit/default/#/process-instance/${instance.id}`} target="_blank">{instance.id}</a>
+                  {/* <a href={`http://${this.props.servers.camundaServer}/app/tasklist/default/#/?task=${instance.id}`} target="_blank">{instance.id}</a> */}
+                </li>
               })}
             </ul>
           </div>
@@ -149,7 +166,7 @@ export class Instances extends Component {
 
         <div className="container">
           <h3>Request new Instance</h3>
-          <Alert ref="alert" message="ok3" />
+          <Alert ref="alert" message="" />
           <form ref={(input) => this.instanceForm = input} autoComplete="off" className="form-horizontal" onSubmit={(e) => this.createInstance(e)}>
             
             {/* Git */}
@@ -186,12 +203,17 @@ export class Instances extends Component {
               </div>
             } */}
 
+            { this.state.selectedProject != '' && this.state.gitCommits.length === 0 &&
+              <p className="text-danger">GitLab Project has no Commits. Create a initial Commit to proceed!</p>
+            }
+
             {this.state.gitCommits.length > 0 && 
               <div className="form-group">
                 <label>Select a Commit</label>
                 <Select 
                   name="git_commit"
                   id="git_commit"
+                  required
                   value={this.state.selectedCommit}
                   //ref={(input) => this.git_commit = input} 
                   onChange = {this.handleCommitChange}
@@ -295,7 +317,10 @@ export class Instances extends Component {
             }
 
             {/* Submit */}
-            <button type="submit" className="btn btn-primary">Create Instance</button>
+            { this.state.gitProjects.length === 0 &&
+              <p className="text-danger">GitLab Server is offline!</p>
+            }
+            <button disabled={this.state.gitCommits.length === 0} type="submit" className="btn btn-primary">Create Instance</button>
           </form>
         </div>
       </div>

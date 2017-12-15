@@ -22,9 +22,9 @@ export const Header = (props) => {
                     <li className="nav-item">
                         <NavLink to="/servers" className="nav-link" activeStyle={{ color: "red" }}>Servers</NavLink>
                     </li>
-                    <li className="nav-item">
+                    {/* <li className="nav-item">
                         <NavLink to="/admin" className="nav-link" activeStyle={{ color: "red" }}>Admin</NavLink>
-                    </li>
+                    </li> */}
                     <li className="nav-item">
                     <   NavLink to="/instances" className="nav-link" activeStyle={{ color: "red" }}>Instances</NavLink>
                     </li>
