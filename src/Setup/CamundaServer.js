@@ -37,12 +37,15 @@ export class CamundaServer extends Component {
 
         fetch(url)
         .then(result => {
-            result.json()
-            this.setState({test_success: true});
-            this.refs.alert.generateAlert("Connection successfull", "Camunda Server is running. Save the connection to proceed", "success")
+            result.json();
+            if(result.url === url) {
+                this.setState({test_success: true});
+                this.refs.alert.generateAlert("Connection successfull", "Camunda Server is running. Save the connection to proceed", "success")
+            }
         })
         .catch(error => {
             this.setState({test_success: false});
+            console.log("connection failed: " + error);
             this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working try another server.", "warning");
         });
     }
@@ -56,13 +59,20 @@ export class CamundaServer extends Component {
 
     renderCamundaSetup(props) {
         return (
-            <form onSubmit={this.props.saveConnection} autocomplete="off">
+            <form onSubmit={this.props.saveConnection} autoComplete="off">
                 <fieldset>
                     <legend>Camunda Server</legend>
                     <div className="form-group">
                         <p>First you have to connect to the Camunda Server</p>
                         <label>Server-Adress</label>
-                        <input type="text" name="camundaServer" className="form-control" id="inputCamundaServer" aria-describedby="camundaServerHelp" onChange={this.changeCamundaServer} value={this.state.camundaServer} />
+                        <input 
+                            type="text" 
+                            name="camundaServer" 
+                            className="form-control" 
+                            id="inputCamundaServer" 
+                            onChange={this.changeCamundaServer} 
+                            placeholder="Camunda Server URL"
+                            defaultValue={this.state.camundaServer || ""} />
                         <small id="camundaServerHelp" className="form-text text-muted">Make sure the server is running.</small>
                     </div>
 
@@ -89,9 +99,7 @@ export class CamundaServer extends Component {
 
                     <button type="button" onClick={this.checkConnection} className="btn btn-warning">Test connection</button>
                     <p></p>
-                    { this.state.test_success &&
-                        <button type="submit" className="btn btn-success">Save</button>
-                    }
+                    <button type="submit" disabled={!this.state.test_success} className="btn btn-success">Save</button>
                 </fieldset>
             </form>
         )

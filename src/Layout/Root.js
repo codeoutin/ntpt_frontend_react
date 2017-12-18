@@ -96,7 +96,6 @@ export class Root extends Component {
                         <Route exact path='/' component={Splash} />
                         <Route path='/camunda-server' render={CamundaServerPage} />
                         <Route path='/servers' render={ServersPage} />
-                        {/* <Route path='/admin' render={AdminPage} /> */}
                         <Route path='/instances' render={InstancesPage} />
                     </div>
                 </Switch>

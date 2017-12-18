@@ -5,11 +5,11 @@ export class Servers extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            jenkinsServer: this.props.servers.jenkinsServer,
-            gitlabServer: this.props.servers.gitlabServer,
-            mongodbServer: this.props.servers.mongodbServer,
-            sonarqubeServer: this.props.servers.sonarqubeServer,
-            gitlabToken: this.props.servers.gitlabToken,
+            jenkinsServer: (this.props.servers.jenkinsServer !== "null" ? this.props.servers.jenkinsServer : "") ,
+            gitlabServer: (this.props.servers.gitlabServer !== "null" ? this.props.servers.gitlabServer : ""),
+            mongodbServer: (this.props.servers.mongodbServer !== "null" ? this.props.servers.mongodbServer : ""),
+            sonarqubeServer: (this.props.servers.sonarqubeServer !== "null" ? this.props.servers.sonarqubeServer : ""),
+            gitlabToken: (this.props.servers.gitlabToken !== "null" ? this.props.servers.gitlabToken : ""),
 
             jenkinsTestSuccess: false,
             gitlabTestSuccess: false,
@@ -57,13 +57,15 @@ export class Servers extends Component {
 
     checkJenkinsConnection(e) {
         e.preventDefault();
-        var url = this.state.jenkinsServer + '/api/json';
-        console.log('http://' + url);
-        fetch('http://' + url)
+        var url = 'http://' + this.state.jenkinsServer + '/api/json';
+        fetch(url)
         .then(result => {
-            result.json()
-            this.setState({jenkinsTestSuccess: true});
-            this.refs.alert.generateAlert("Connection successfull", "Jenkins Server is running. Save the connection to proceed", "success")
+            if(result.status === 200 && result.url === url) {
+                this.setState({jenkinsTestSuccess: true});
+                this.refs.alert.generateAlert("Connection successfull", "Jenkins Server is running. Save the connection to proceed", "success")
+            } else {
+                this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working check the console.log.", "warning");
+            }
         })
         .catch(error => {
             this.setState({jenkinsTestSuccess: false});
@@ -73,16 +75,17 @@ export class Servers extends Component {
 
     checkGitlabConnection(e) {
         e.preventDefault();
-        var url = this.state.gitlabServer + '/api/v4/projects?private-token=' + this.state.gitlabToken;
-        console.log('http://' + url);
-        fetch('http://' + url)
+        var url = 'http://' + this.state.gitlabServer + '/api/v4/projects?private-token=' + this.state.gitlabToken;
+        fetch(url)
         .then(result => {
-            //result.json() < Unhandled Rejection (SyntaxError): Unexpected token G in JSON at position 0. .........
-            this.setState({gitlabTestSuccess: true});
-            if(result.message === "401 Unauthorized") {
+            if(result.status === 200 && result.url === url) {
+                this.setState({gitlabTestSuccess: true});
+                this.refs.alert.generateAlert("Connection successfull", "GitLab Server is running. Save the connection to proceed", "success")
+            } else if (result.message === "401 Unauthorized") {
                 this.refs.alert.generateAlert("Connection failed", "GitLab Token seems to be wrong", "warning");
+            } else {
+                this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working check the console.log.", "warning");
             }
-            this.refs.alert.generateAlert("Connection successfull", "GitLab Server is running. Save the connection to proceed", "success")
         })
         .catch(error => {
             this.setState({gitlabTestSuccess: false});
@@ -92,12 +95,15 @@ export class Servers extends Component {
 
     checkMongodbConnection(e) {
         e.preventDefault();
-        var url = this.state.mongodbServer + '/status';
-        console.log('http://' + url);
-        fetch('http://' + url)
+        var url = 'http://' + this.state.mongodbServer + '/status';
+        fetch(url)
         .then(result => {
-            this.setState({mongodbTestSuccess: true});
-            this.refs.alert.generateAlert("Connection successfull", "MongoDB Server is running. Save the connection to proceed", "success")
+            if(result.status === 200 && result.url === url) {
+                this.setState({mongodbTestSuccess: true});
+                this.refs.alert.generateAlert("Connection successfull", "MongoDB Server is running. Save the connection to proceed", "success")
+            } else {
+                this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working check the console.log.", "warning");
+            }
         })
         .catch(error => {
             this.setState({mongodbTestSuccess: false});
@@ -107,13 +113,15 @@ export class Servers extends Component {
 
     checkSonarqubeConnection(e) {
         e.preventDefault();
-        var url = this.state.sonarqubeServer + '/api/languages/list';
-        console.log('http://' + url);
-        fetch('http://' + url)
+        var url = 'http://' + this.state.sonarqubeServer + '/api/languages/list';
+        fetch(url)
         .then(result => {
-            console.log(result.languages);
-            this.setState({sonarqubeTestSuccess: true});
-            this.refs.alert.generateAlert("Connection successfull", "SonarQube Server is running. Save the connection to proceed", "success")
+            if(result.status === 200 && result.url === url) {
+                this.setState({sonarqubeTestSuccess: true});
+                this.refs.alert.generateAlert("Connection successfull", "SonarQube Server is running. Save the connection to proceed", "success")
+            } else {
+                this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working check the console.log.", "warning");
+            }
         })
         .catch(error => {
             this.setState({sonarqubeTestSuccess: false});
@@ -134,30 +142,125 @@ export class Servers extends Component {
                     <legend>Required Servers</legend>
 
                     <div className="form-group">
-                        <label>Jenkins Server <button type="button" onClick={this.checkJenkinsConnection} className="btn btn-sm btn-warning">Test Connection</button></label>
-                        <input type="text" className="form-control" name="jenkinsServer" id="inputJenkinsServer" defaultValue={this.props.servers.jenkinsServer} onChange={this.changeJenkinsServer} />
+                        <label>
+                            Jenkins Server &nbsp;
+                            <button 
+                                type="button" 
+                                disabled={!this.state.jenkinsServer}
+                                onClick={this.checkJenkinsConnection} 
+                                className="btn btn-sm btn-warning">Test Connection
+                            </button> &nbsp;
+                            <button
+                                type="button"
+                                disabled={!this.state.jenkinsServer}
+                                onClick={() => window.open("http://"+this.state.jenkinsServer)}
+                                className="btn btn-sm btn-info">Visit
+                            </button>
+                        </label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="jenkinsServer" 
+                            id="inputJenkinsServer" 
+                            defaultValue={this.state.jenkinsServer} 
+                            placeholder="Jenkins Server URL" 
+                            onChange={this.changeJenkinsServer} />
                     </div>
 
                     <div className="form-group">
-                        <label>Gitlab Server <button type="button" onClick={this.checkGitlabConnection} className="btn btn-sm btn-warning">Test Connection</button></label>
-                        <input type="text" className="form-control" name="gitlabServer" id="inputGitlabServer" defaultValue={this.props.servers.gitlabServer} onChange={this.props.changeGitlabServer} />
+                        <label>
+                            Gitlab Server &nbsp;
+                            <button 
+                                type="button"
+                                disabled={!this.state.gitlabServer && !this.state.gitlabToken}
+                                onClick={this.checkGitlabConnection} 
+                                className="btn btn-sm btn-warning">Test Connection
+                            </button> &nbsp;
+                            <button
+                                type="button"
+                                disabled={!this.state.gitlabServer}
+                                onClick={() => window.open("http://"+this.state.gitlabServer)}
+                                className="btn btn-sm btn-info">Visit
+                            </button>
+                        </label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="gitlabServer" 
+                            id="inputGitlabServer" 
+                            defaultValue={this.state.gitlabServer} 
+                            placeholder="GitLab Server URL" 
+                            onChange={this.changeGitlabServer} 
+                        />
                         <br />
-                        <input type="text" className="form-control" name="gitlabToken" id="inputGitlabToken" defaultValue={this.props.servers.gitlabToken} placeholder="Personal Access Token" onChange={this.changeGitlabToken} />
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="gitlabToken"
+                            id="inputGitlabToken" 
+                            defaultValue={this.state.gitlabToken} 
+                            placeholder="Personal Access Token" 
+                            onChange={this.changeGitlabToken} 
+                        />
                     </div>
 
                     <div className="form-group">
-                        <label>MongoDB Server <button type="button" onClick={this.checkMongodbConnection} className="btn btn-sm btn-warning">Test Connection</button></label>
-                        <input type="text" className="form-control" name="mongodbServer" id="inputMongoDBServer" defaultValue={this.props.servers.mongodbServer} onChange={this.changeMongodbServer} />
+                        <label>MongoDB Server &nbsp;
+                            <button 
+                                type="button"
+                                disabled={!this.state.mongodbServer}
+                                onClick={this.checkMongodbConnection} 
+                                className="btn btn-sm btn-warning">Test Connection
+                            </button> &nbsp;
+                            <button
+                                type="button"
+                                disabled={!this.state.mongodbServer}
+                                onClick={() => window.open("http://"+this.state.mongodbServer)}
+                                className="btn btn-sm btn-info">Visit
+                            </button>
+                        </label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="mongodbServer" 
+                            id="inputMongoDBServer" 
+                            defaultValue={this.state.mongodbServer} 
+                            placeholder="MongoDB Server URL" 
+                            onChange={this.changeMongodbServer} 
+                        />
                     </div>
 
                     <div className="form-group">
-                        <label>SonarQube Server <button type="button" onClick={this.checkSonarqubeConnection} className="btn btn-sm btn-warning">Test Connection</button></label>
-                        <input type="text" className="form-control" name="sonarqubeServer" id="inputSonarqubeServer" defaultValue={this.props.servers.sonarqubeServer} onChange={this.changeSonarqubeServer} />
+                        <label>SonarQube Server &nbsp;
+                            <button 
+                                type="button" 
+                                disabled={!this.state.sonarqubeServer}
+                                onClick={this.checkSonarqubeConnection} 
+                                className="btn btn-sm btn-warning">Test Connection
+                            </button> &nbsp;
+                            <button
+                                type="button"
+                                disabled={!this.state.sonarqubeServer}
+                                onClick={() => window.open("http://"+this.state.sonarqubeServer)}
+                                className="btn btn-sm btn-info">Visit
+                            </button>
+                        </label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="sonarqubeServer" 
+                            id="inputSonarqubeServer" 
+                            defaultValue={this.state.sonarqubeServer} 
+                            placeholder="SonarQube Server URL" 
+                            onChange={this.changeSonarqubeServer} 
+                        />
                     </div>
 
-                    {this.state.gitlabTestSuccess &&
-                        <button type="submit" className="btn btn-success">Save</button>
-                    }
+                    <button 
+                        type="submit" 
+                        disabled={!this.state.gitlabTestSuccess && !this.state.jenkinsTestSuccess && !this.state.mongodbTestSuccess && !this.state.sonarqubeTestSuccess} 
+                        className="btn btn-success">Save
+                    </button>
                 </fieldset>
             </form>
         );

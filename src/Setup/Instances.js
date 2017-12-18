@@ -3,49 +3,56 @@ import { Alert } from '../Layout/Alert';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 
+import {Running} from './Instances/Running';
+
 export class Instances extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      runningInstances: [],
       gitProjects: [],
       gitCommits: [],
+      sqQualityGates: [],
+      git_branch_name: '',
       selectedProject: '',
       selectedCommit: '',
+      selectedQualityGate: '',
       camundaEngine: [],
       BP: false,
       DB: false,
       AddArtifacts: false
     };
+
     this.handleBP = this.handleBP.bind(this);
     this.handleDB = this.handleDB.bind(this);
     this.handleAddArtifacts = this.handleAddArtifacts.bind(this);
+    this.handleBranchNameChange = this.handleBranchNameChange.bind(this);
     //this.changeProject = this.changeProject.bind(this);
   }
 
   componentDidMount() {
     const gitUrl = 'http://' + this.props.servers.gitlabServer;
+    const sqUrl = 'http://' + this.props.servers.sonarqubeServer;
     const camundaUrl = 'http://' + this.props.servers.camundaServer;
 
     fetch(gitUrl + '/api/v4/projects?private_token=' + this.props.servers.gitlabToken)
     .then(result => result.json())
     .then(gitProjects => this.setState({gitProjects}))
     .catch(error => {
-      this.refs.alert.generateAlert("Connection failed", "Failed to connect to GitLab Server. Check Server Page.", "warning");
-    });
-
-    fetch(camundaUrl + '/rest/process-instance/')
-    .then(result => result.json())
-    .then(runningInstances => this.setState({runningInstances}))
-    .catch(error => {
-      this.refs.alert.generateAlert("Connection failed", "Failed to connect to Camunda Server. Check Server Page.", "warning");
+      this.refs.alert.generateAlert("Connection failed", "Failed to connect to GitLab Server. Check Server Page.", "info");
     });
 
     fetch(camundaUrl + '/rest/engine/')
     .then(result => result.json())
     .then(camundaEngine => this.setState({camundaEngine}))
     .catch(error => {
-      this.refs.alert.generateAlert("Connection failed", "Failed to connect to Camunda Server. Check Server Page.", "warning");
+      console.log(error);
+    });
+
+    fetch(sqUrl + '/api/qualitygates/list')
+    .then(result => result.json())
+    .then(sqQualityGates => this.setState({sqQualityGates}))
+    .catch(error => {
+      this.refs.alert.generateAlert("Connection failed", "Failed to connect to SonarQube. Check Server Page.", "info");
     });
   }
 
@@ -68,7 +75,7 @@ export class Instances extends Component {
     //create camunda-variables
     var instance = {
       variables: {
-        prefix: {value: project_name + "_" + this.git_branch_name.value , type: "String"},
+        prefix: {value: project_name + "_" + this.state.git_branch_name , type: "String"},
 
         additional_artifacts: {value: this.state.AddArtifacts, type: "Boolean"}, //input
         additional_artifacts_text: (this.state.AddArtifacts ? {value: this.additional_artifacts_text.value, type: "String"} : undefined), //input
@@ -79,13 +86,13 @@ export class Instances extends Component {
         
         db_url: (this.state.DB ? {value: this.props.servers.mongodbServer, type: "String"} : undefined),
 
-        git_branch_name: {value: this.git_branch_name.value, type: "String"}, //input
+        git_branch_name: {value: this.state.git_branch_name, type: "String"}, //input
         git_token: {value: this.props.servers.gitlabToken, type: "String"},
         git_project: {value: this.state.selectedProject.value, type: "String"}, //input
         git_commit: {value: this.state.selectedCommit.value, type: "String"}, //input
         git_url: {value: this.props.servers.gitlabServer, type: "String"},
 
-        sonarqube_profile: {value: this.sonarqube_profile.value, type: "String"}, //input
+        sonarqube_profile: (this.state.sqQualityGates.length > 0 ? {value: this.sonarqube_profile.value, type: "String"} : {value: "no", type: "String"}), //input
         sonarqube_url: {value: this.props.servers.sonarqubeServer, type: "String"},
 
         test_environment: {value: this.test_environment.checked, type: "Boolean"}, //input
@@ -94,7 +101,7 @@ export class Instances extends Component {
 
     //generate json object out of instance object
     var jsonPost = JSON.stringify(instance);
-    //console.log(jsonPost);
+    console.log(jsonPost);
     var resultId = "";
 
     //connect to camunda engine
@@ -109,10 +116,20 @@ export class Instances extends Component {
     .then(res => res.json())
     .then(res => resultId = res.id)
     .then(res => this.refs.alert.generateAlert("New Instance Created", "Instance ID " + resultId + " created", "success"))
+    .then(res => console.log("resultID: " + resultId))
+    .then(this.setState({
+      git_branch_name: '',
+      selectedProject: '',
+      selectedCommit: '',
+      selectedQualityGate: '',
+    }))
     .then(this.instanceForm.reset());
   }
 
-  //for react-select
+  handleBranchNameChange = (e) => {
+    this.setState({git_branch_name: e.target.value.replace(/[^a-zA-Z0-9.]/,'')});
+  }
+
   handleProjectChange = (selectedProject) => {
     this.setState({ selectedProject });
     const projectId = selectedProject.value;
@@ -124,24 +141,35 @@ export class Instances extends Component {
 
   handleCommitChange = (selectedCommit) => {
     this.setState({ selectedCommit });
-    //console.log("selected: ${selectedCommit.title}")
   }
-  //end
+
+  handleSQChange = (selectedQualityGate) => {
+    this.setState({ selectedQualityGate });
+  }
+  //end for react-select
 
   render() {
     const getProjects = this.state.gitProjects.map (project => ({ 
       value: project.id, 
       label: project.path_with_namespace
     }));
-
+    
     const getCommits = this.state.gitCommits.map (commit => ({ 
       value: commit.id, 
       label: '['+ commit.short_id+'] ' + commit.title
     }));
     getCommits.push({value: 'HEAD', label: 'HEAD'});
+    
+    // Object inside Array inside Object = Confused Patrick
+    // const getQualityGates = Object.keys(this.state.sqQualityGates).map (gate => ({ 
+    //   value: gate.id, 
+    //   label: gate.name
+    // }));
+    // getQualityGates.push({value: 'no', label: 'No Quality Check'});
 
     return (
-      <div>
+      <div className="container">
+        <Alert ref="alert" />
         {this.state.camundaEngine.length === 0 && 
           <div className="alert alert-dismissible alert-warning">
             <button type="button" className="close" data-dismiss="alert">&times;</button>
@@ -149,32 +177,21 @@ export class Instances extends Component {
             <p className="mb-0">Camunda is currently not running. Make sure to start the server, before you request a new Instance.</p>
           </div>
         }
-
-        {this.state.runningInstances.length > 0 &&
-          <div className="container">
-            <h3>Running Instances ({this.state.runningInstances.length})</h3>
-            <ul>
-              {this.state.runningInstances.map(instance=>{
-                return <li key={instance.id}>
-                  <a href={`http://localhost:8080/app/cockpit/default/#/process-instance/${instance.id}`} target="_blank">{instance.id}</a>
-                  {/* <a href={`http://${this.props.servers.camundaServer}/app/tasklist/default/#/?task=${instance.id}`} target="_blank">{instance.id}</a> */}
-                </li>
-              })}
-            </ul>
-          </div>
-        }
-
-        <div className="container">
-          <h3>Request new Instance</h3>
-          <Alert ref="alert" message="" />
+        
+        <h1>Instances</h1>
+        <Running camundaServer={this.props.servers.camundaServer} /><br />
+        
+        <div>
+          <legend>Request new Instance</legend>
           <form ref={(input) => this.instanceForm = input} autoComplete="off" className="form-horizontal" onSubmit={(e) => this.createInstance(e)}>
             
             {/* Git */}
             <div className="form-group">
               <label className="control-label">Branch Name</label>
               <div className="controls">
-                <input ref={(input) => this.git_branch_name = input} required type="text" className="form-control"
-                  name="git_branch_name" placeholder="ABCD" />
+                <input type="text" key="git_branch_name" onChange={this.handleBranchNameChange} required className="form-control"
+                  name="git_branch_name" placeholder="Branch Name" value={this.state.git_branch_name} />
+                <small className="form-text text-muted">Use letters and numbers only. No spaces, no special characters</small>
               </div>
             </div>
 
@@ -203,7 +220,7 @@ export class Instances extends Component {
               </div>
             } */}
 
-            { this.state.selectedProject != '' && this.state.gitCommits.length === 0 &&
+            { this.state.selectedProject !== '' && this.state.gitCommits.length === 0 &&
               <p className="text-danger">GitLab Project has no Commits. Create a initial Commit to proceed!</p>
             }
 
@@ -275,13 +292,25 @@ export class Instances extends Component {
             }
 
             {/* SonarQube */}
+            {/* {this.state.sqQualityGates &&
+              <div className="form-group">
+                <label>Select a SonarQube Quality Gate</label>
+                <Select
+                  id="sonarqube_profile" 
+                  value={this.state.selectedQualityGate}
+                  onChange={this.handleSQChange}
+                  options={getQualityGates}
+                  searchable={false}
+                />
+              </div>
+            } */}
+
             <div className="form-group">
               <label>Select a SonarQube (QA) Profile</label>
               <select ref={(input) => this.sonarqube_profile = input} className="form-control" id="sonarqube_profile">
                 <option value="no">No QA</option>
-                <option value="profile1">Profile 1</option>
-                <option value="profile2">Profile 2</option>
-                <option value="profile3">Profile 3</option>
+                <option value="profile1">SonarQube High Quality Gate</option>
+                <option value="profile2">SonarQube Medium Quality Gate</option>
               </select>
             </div>
 
@@ -323,6 +352,7 @@ export class Instances extends Component {
             <button disabled={this.state.gitCommits.length === 0} type="submit" className="btn btn-primary">Create Instance</button>
           </form>
         </div>
+
       </div>
     );
   }
