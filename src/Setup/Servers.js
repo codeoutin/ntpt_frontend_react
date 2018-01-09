@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import { Alert } from '../Layout/Alert';
 
+/**
+ * Display a Page to enter multiple Servers to connect to
+ * @author Patrick Steger
+ * @see {@link https://github.com/stegerpa/ntpt_frontend_react|GitHub}
+ */
+
 export class Servers extends Component {
     constructor(props) {
         super(props);
@@ -55,6 +61,10 @@ export class Servers extends Component {
         this.props.changeSonarqubeServer(e);
     }
 
+    /**
+     * Test Connection to a Jenkins Server
+     * @param {*} e 
+     */
     checkJenkinsConnection(e) {
         e.preventDefault();
         var url = 'http://' + this.state.jenkinsServer + '/api/json';
@@ -73,6 +83,10 @@ export class Servers extends Component {
         });
     }
 
+    /**
+     * Test Connection to a GitLab Server
+     * @param {*} e 
+     */
     checkGitlabConnection(e) {
         e.preventDefault();
         var url = 'http://' + this.state.gitlabServer + '/api/v4/projects?private-token=' + this.state.gitlabToken;
@@ -93,6 +107,10 @@ export class Servers extends Component {
         });
     }
 
+    /**
+     * Test Connection to a MongoDB Server
+     * @param {*} e 
+     */
     checkMongodbConnection(e) {
         e.preventDefault();
         var url = 'http://' + this.state.mongodbServer + '/status';
@@ -111,6 +129,10 @@ export class Servers extends Component {
         });
     }
 
+    /**
+     * Test Connection to a SonarQube Server
+     * @param {*} e 
+     */
     checkSonarqubeConnection(e) {
         e.preventDefault();
         var url = 'http://' + this.state.sonarqubeServer + '/api/languages/list';
@@ -202,6 +224,7 @@ export class Servers extends Component {
                             placeholder="Personal Access Token" 
                             onChange={this.changeGitlabToken} 
                         />
+                        <small id="camundaServerHelp" className="form-text text-muted">GitLab Personal Access Token. If you need help <a href="https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html" target="_blank" rel="noopener noreferrer">read the docs</a>.</small>
                     </div>
 
                     <div className="form-group">

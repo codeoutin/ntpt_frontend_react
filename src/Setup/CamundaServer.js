@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import { Alert } from '../Layout/Alert';
 
+/**
+ * Display a Page for Camunda Server + optional Authentication Variables
+ * @author Patrick Steger
+ * @see {@link https://github.com/stegerpa/ntpt_frontend_react|GitHub}
+ */
 export class CamundaServer extends Component {
     constructor(props) {
         super(props);
@@ -16,10 +21,9 @@ export class CamundaServer extends Component {
         this.checkConnection = this.checkConnection.bind(this);
     }
 
+
     handleAuth(event) {
-        this.setState({
-            authentication_required: !this.state.authentication_required
-        });
+        this.setState({authentication_required: !this.state.authentication_required});
     }
 
     changeCamundaServer(e) {
@@ -27,6 +31,10 @@ export class CamundaServer extends Component {
         this.props.changeCamundaServer(e);
     }
 
+    /**
+     * Test Connection of entered Server
+     * @param {*} event 
+     */
     checkConnection(event) {
         event.preventDefault();
         var url = this.state.camundaServer;

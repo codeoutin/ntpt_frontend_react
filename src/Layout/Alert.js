@@ -1,6 +1,17 @@
 import React, { Component } from 'react';
 import { AlertList } from 'react-bs-notifier';
 
+/**
+ * This class is used to display Bootstrap-Alerts in the page
+ * We use React Bootstrap Notifier to generate Alerts (https://github.com/chadly/react-bs-notifier)
+ * 
+ * Instructions:
+ * Import this class, put <Alert ref="alert" /> somewhere in your render method and throw Alerts in functions:
+ * this.refs.alert.generateAlert("{headline}", "{message}", "{type}");
+ * 
+ * @author Patrick Steger
+ * @see {@link https://github.com/stegerpa/ntpt_frontend_react|GitHub}
+ */
 export class Alert extends Component {
     constructor(props) {
         super(props);
@@ -10,6 +21,10 @@ export class Alert extends Component {
         };
     }
     
+    /**
+     * Removes an Alert
+     * @param {*} alert - Alert that gets removed from the Array
+     */
     onAlertDismissed(alert) {
         const alerts = this.state.alerts;
     
@@ -24,6 +39,12 @@ export class Alert extends Component {
         }
     }
 
+    /**
+     * 
+     * @param {String} header - Headline of the Alert
+     * @param {String} message - Message displayed in Alert
+     * @param {String} type - Type of Alert (info, success, warning, danger)
+     */
     generateAlert(header, message, type) {
         const newAlert ={
             id: (new Date()).getTime(),
@@ -37,6 +58,10 @@ export class Alert extends Component {
         });
     }
 
+    /**
+     * Render Method
+     * @param {*} props 
+     */
     render(props) {
         return(
             <div>

@@ -2,16 +2,22 @@ import React, { Component } from 'react';
 import { Alert } from '../Layout/Alert';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
-
 import {Running} from './Instances/Running';
 
+/**
+ * Renders the page to create a new Camunda Process Instance
+ * Theres React-Select (https://github.com/JedWatson/react-select) included, a great Package for Select Elements. It adds functions
+ * for Searching, Asychnronous Loading, and more.
+ * @author Patrick Steger
+ * @see {@link https://github.com/stegerpa/ntpt_frontend_react|GitHub}
+ */
 export class Instances extends Component {
   constructor(props) {
     super(props);
     this.state = {
       gitProjects: [],
       gitCommits: [],
-      sqQualityGates: [],
+      sqQualityGates: [{qualitygates: []}],
       git_branch_name: '',
       selectedProject: '',
       selectedCommit: '',
@@ -29,6 +35,9 @@ export class Instances extends Component {
     //this.changeProject = this.changeProject.bind(this);
   }
 
+  /**
+   * Bug: Error when you switch page before Alerts could be displayed
+   */
   componentDidMount() {
     const gitUrl = 'http://' + this.props.servers.gitlabServer;
     const sqUrl = 'http://' + this.props.servers.sonarqubeServer;
@@ -60,6 +69,10 @@ export class Instances extends Component {
   handleDB(e) {this.setState({DB: !this.state.DB})}
   handleAddArtifacts(e) {this.setState({AddArtifacts: !this.state.AddArtifacts})}
 
+  /**
+   * Creates a new Process Instance with entered Form Data
+   * @param {*} e 
+   */
   createInstance(e) {
     e.preventDefault();
     console.log(this.state.selectedProject.value);
@@ -92,7 +105,7 @@ export class Instances extends Component {
         git_commit: {value: this.state.selectedCommit.value, type: "String"}, //input
         git_url: {value: this.props.servers.gitlabServer, type: "String"},
 
-        sonarqube_profile: (this.state.sqQualityGates.length > 0 ? {value: this.sonarqube_profile.value, type: "String"} : {value: "no", type: "String"}), //input
+        sonarqube_profile: {value: this.state.selectedQualityGate.value, type: "String"}, //input
         sonarqube_url: {value: this.props.servers.sonarqubeServer, type: "String"},
 
         test_environment: {value: this.test_environment.checked, type: "Boolean"}, //input
@@ -127,9 +140,12 @@ export class Instances extends Component {
   }
 
   handleBranchNameChange = (e) => {
-    this.setState({git_branch_name: e.target.value.replace(/[^a-zA-Z0-9.]/,'')});
+    this.setState({git_branch_name: e.target.value.replace(/[^a-zA-Z0-9.]/,'')}); //only alphanumeric symbols, no spaces
   }
 
+  /**
+   * Everytime a user changes the project we need to get the new Branches / Commits for this Project
+   */
   handleProjectChange = (selectedProject) => {
     this.setState({ selectedProject });
     const projectId = selectedProject.value;
@@ -146,7 +162,6 @@ export class Instances extends Component {
   handleSQChange = (selectedQualityGate) => {
     this.setState({ selectedQualityGate });
   }
-  //end for react-select
 
   render() {
     const getProjects = this.state.gitProjects.map (project => ({ 
@@ -160,13 +175,18 @@ export class Instances extends Component {
     }));
     getCommits.push({value: 'HEAD', label: 'HEAD'});
     
-    // Object inside Array inside Object = Confused Patrick
-    // const getQualityGates = Object.keys(this.state.sqQualityGates).map (gate => ({ 
-    //   value: gate.id, 
-    //   label: gate.name
-    // }));
-    // getQualityGates.push({value: 'no', label: 'No Quality Check'});
-
+    // This is empty at first render, but gets filled later. Trying to access .qualitygates throws exception because its not defined at first render.
+    // Solution working: Define Object and check if qualitygates !== undefined ...
+    var getQualityGates = [];
+    if(this.state.sqQualityGates.qualitygates !== undefined) {
+      getQualityGates = this.state.sqQualityGates.qualitygates.map (gate => ({ 
+        value: gate.id, 
+        label: gate.name
+      }));
+    }
+    getQualityGates.push({value: 'no', label: 'No Quality Check'});
+    //console.log(getQualityGates);
+    
     return (
       <div className="container">
         <Alert ref="alert" />
@@ -292,7 +312,7 @@ export class Instances extends Component {
             }
 
             {/* SonarQube */}
-            {/* {this.state.sqQualityGates &&
+            {this.state.sqQualityGates &&
               <div className="form-group">
                 <label>Select a SonarQube Quality Gate</label>
                 <Select
@@ -303,16 +323,16 @@ export class Instances extends Component {
                   searchable={false}
                 />
               </div>
-            } */}
+            }
 
-            <div className="form-group">
+            {/* <div className="form-group">
               <label>Select a SonarQube (QA) Profile</label>
               <select ref={(input) => this.sonarqube_profile = input} className="form-control" id="sonarqube_profile">
                 <option value="no">No QA</option>
                 <option value="profile1">SonarQube High Quality Gate</option>
                 <option value="profile2">SonarQube Medium Quality Gate</option>
               </select>
-            </div>
+            </div> */}
 
             {/* Test Environment */}
             <div className="form-group">
