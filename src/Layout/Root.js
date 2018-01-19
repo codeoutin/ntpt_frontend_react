@@ -23,6 +23,7 @@ export class Root extends Component {
             mongodbServer: localStorage.getItem('mongodbServer'),
             sonarqubeServer: localStorage.getItem('sonarqubeServer'),
             gitlabToken: localStorage.getItem('gitlabToken'),
+            dockerServer: localStorage.getItem('dockerServer'),
             menuItems: [
                 {link: "/camunda-server",  name: "Camunda Server"},
                 {link: "/servers",  name: "Servers"},
@@ -36,6 +37,7 @@ export class Root extends Component {
         this.changeGitlabToken = this.changeGitlabToken.bind(this);
         this.changeMongodbServer = this.changeMongodbServer.bind(this);
         this.changeSonarqubeServer = this.changeSonarqubeServer.bind(this);
+        this.changeDockerServer = this.changeDockerServer.bind(this);
         this.saveConnection = this.saveConnection.bind(this);
     }
 
@@ -60,6 +62,9 @@ export class Root extends Component {
     changeSonarqubeServer(e) {
         this.setState({sonarqubeServer: e.target.value.replace(/^(https?:|)\/\//,'')})
     }
+    changeDockerServer(e) {
+        this.setState({dockerServer: e.target.value.replace(/^(https?:|)\/\//,'')})
+    }
 
     /**
      * Saves commited Servers in a Local Browser Storage
@@ -74,6 +79,7 @@ export class Root extends Component {
         localStorage.setItem('mongodbServer', this.state.mongodbServer);
         localStorage.setItem('sonarqubeServer', this.state.sonarqubeServer);
         localStorage.setItem('gitlabToken', this.state.gitlabToken);
+        localStorage.setItem('dockerServer', this.state.dockerServer);
         this.refs.alert.generateAlert("Success", "Your data has been saved.", "success")
     }
 
@@ -96,6 +102,7 @@ export class Root extends Component {
             changeGitlabToken={this.changeGitlabToken.bind(this)}
             changeMongodbServer={this.changeMongodbServer.bind(this)}
             changeSonarqubeServer={this.changeSonarqubeServer.bind(this)}
+            changeDockerServer={this.changeDockerServer.bind(this)}
             saveConnection={this.saveConnection.bind(this)}
             
         />)}

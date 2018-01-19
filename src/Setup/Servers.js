@@ -15,12 +15,14 @@ export class Servers extends Component {
             gitlabServer: (this.props.servers.gitlabServer !== "null" ? this.props.servers.gitlabServer : ""),
             mongodbServer: (this.props.servers.mongodbServer !== "null" ? this.props.servers.mongodbServer : ""),
             sonarqubeServer: (this.props.servers.sonarqubeServer !== "null" ? this.props.servers.sonarqubeServer : ""),
+            dockerServer: (this.props.servers.dockerServer !== "null" ? this.props.servers.dockerServer : ""),
             gitlabToken: (this.props.servers.gitlabToken !== "null" ? this.props.servers.gitlabToken : ""),
 
             jenkinsTestSuccess: false,
             gitlabTestSuccess: false,
             mongodbTestSuccess: false,
             sonarqubeTestSuccess: false,
+            dockerTestSuccess: false,
         };
 
         // This binding is necessary to make `this` work in the callback
@@ -29,11 +31,13 @@ export class Servers extends Component {
         this.changeGitlabToken = this.changeGitlabToken.bind(this);
         this.changeMongodbServer = this.changeMongodbServer.bind(this);
         this.changeSonarqubeServer = this.changeSonarqubeServer.bind(this);
-
+        this.changeDockerServer = this.changeDockerServer.bind(this);
+        
         this.checkJenkinsConnection = this.checkJenkinsConnection.bind(this);
         this.checkGitlabConnection = this.checkGitlabConnection.bind(this);
         this.checkMongodbConnection = this.checkMongodbConnection.bind(this);
         this.checkSonarqubeConnection = this.checkSonarqubeConnection.bind(this);
+        this.checkDockerConnection = this.checkDockerConnection.bind(this);
     }
 
     changeJenkinsServer(e) {
@@ -59,6 +63,11 @@ export class Servers extends Component {
     changeSonarqubeServer(e) {
         this.setState({sonarqubeServer: e.target.value});
         this.props.changeSonarqubeServer(e);
+    }
+
+    changeDockerServer(e) {
+        this.setState({dockerServer: e.target.value});
+        this.props.changeDockerServer(e);
     }
 
     /**
@@ -151,6 +160,28 @@ export class Servers extends Component {
         });
     }
 
+    /**
+     * Test Connection to a Docker Server
+     * @param {*} e 
+     */
+    checkDockerConnection(e) {
+        e.preventDefault();
+        var url = 'http://' + this.state.dockerServer + '/containers/json';
+        fetch(url)
+        .then(result => {
+            if(result.status === 200 && result.url === url) {
+                this.setState({dockerTestSuccess: true});
+                this.refs.alert.generateAlert("Connection successfull", "Docker Server is running. Save the connection to proceed", "success")
+            } else {
+                this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working check the console.log.", "warning");
+            }
+        })
+        .catch(error => {
+            this.setState({dockerTestSuccess: false});
+            this.refs.alert.generateAlert("Connection failed", "Sometimes you have to try serval times. If its still not working check the console.log.", "warning");
+        });
+    }
+
     authenticateUser(username, password) {
         var token = password + ":" + password;
         var hash = btoa(token);
@@ -163,6 +194,7 @@ export class Servers extends Component {
                 <fieldset>
                     <legend>Required Servers</legend>
 
+                    {/* Jenkins */}
                     <div className="form-group">
                         <label>
                             Jenkins Server &nbsp;
@@ -187,8 +219,10 @@ export class Servers extends Component {
                             defaultValue={this.state.jenkinsServer} 
                             placeholder="Jenkins Server URL" 
                             onChange={this.changeJenkinsServer} />
+                        <small className="form-text text-muted">Default Port: 8001</small>
                     </div>
 
+                    {/* GitLab */}
                     <div className="form-group">
                         <label>
                             Gitlab Server &nbsp;
@@ -214,6 +248,7 @@ export class Servers extends Component {
                             placeholder="GitLab Server URL" 
                             onChange={this.changeGitlabServer} 
                         />
+                        <small className="form-text text-muted">Default Port: 8002</small>
                         <br />
                         <input 
                             type="text" 
@@ -224,9 +259,10 @@ export class Servers extends Component {
                             placeholder="Personal Access Token" 
                             onChange={this.changeGitlabToken} 
                         />
-                        <small id="camundaServerHelp" className="form-text text-muted">GitLab Personal Access Token. If you need help <a href="https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html" target="_blank" rel="noopener noreferrer">read the docs</a>.</small>
+                        <small className="form-text text-muted">GitLab Personal Access Token. If you need help <a href="https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html" target="_blank" rel="noopener noreferrer">read the docs</a>.</small>
                     </div>
 
+                    {/* MongoDB */}
                     <div className="form-group">
                         <label>MongoDB Server &nbsp;
                             <button 
@@ -251,8 +287,10 @@ export class Servers extends Component {
                             placeholder="MongoDB Server URL" 
                             onChange={this.changeMongodbServer} 
                         />
+                        <small className="form-text text-muted">Default Port: 8003</small>
                     </div>
 
+                    {/* SonarQube */}
                     <div className="form-group">
                         <label>SonarQube Server &nbsp;
                             <button 
@@ -277,11 +315,40 @@ export class Servers extends Component {
                             placeholder="SonarQube Server URL" 
                             onChange={this.changeSonarqubeServer} 
                         />
+                        <small className="form-text text-muted">Default Port: 8004</small>
                     </div>
 
+                    {/* Docker */}
+                    <div className="form-group">
+                        <label>Docker API Server &nbsp;
+                            <button 
+                                type="button" 
+                                disabled={!this.state.dockerServer}
+                                onClick={this.checkDockerConnection} 
+                                className="btn btn-sm btn-warning">Test Connection
+                            </button> &nbsp;
+                            <button
+                                type="button"
+                                disabled={!this.state.dockerServer}
+                                onClick={() => window.open("http://"+this.state.dockerServer)}
+                                className="btn btn-sm btn-info">Visit
+                            </button>
+                        </label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="dockerServer" 
+                            id="inputDockerServer" 
+                            defaultValue={this.state.dockerServer} 
+                            placeholder="Docker API Server URL" 
+                            onChange={this.changeDockerServer} 
+                        />
+                        <small className="form-text text-muted">Default Port: 4550</small>
+                    </div>
+
+                    {/* Submit */}
                     <button 
                         type="submit" 
-                        disabled={!this.state.gitlabTestSuccess && !this.state.jenkinsTestSuccess && !this.state.mongodbTestSuccess && !this.state.sonarqubeTestSuccess} 
                         className="btn btn-success">Save
                     </button>
                 </fieldset>

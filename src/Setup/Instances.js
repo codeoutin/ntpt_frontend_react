@@ -3,6 +3,7 @@ import { Alert } from '../Layout/Alert';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 import {Running} from './Instances/Running';
+import {SoftwareComponents} from './Instances/SoftwareComponents';
 
 /**
  * Renders the page to create a new Camunda Process Instance
@@ -25,11 +26,13 @@ export class Instances extends Component {
       camundaEngine: [],
       BP: false,
       DB: false,
+      testEnv: false,
       AddArtifacts: false
     };
 
     this.handleBP = this.handleBP.bind(this);
     this.handleDB = this.handleDB.bind(this);
+    this.handletestEnv = this.handletestEnv.bind(this);
     this.handleAddArtifacts = this.handleAddArtifacts.bind(this);
     this.handleBranchNameChange = this.handleBranchNameChange.bind(this);
     //this.changeProject = this.changeProject.bind(this);
@@ -67,6 +70,7 @@ export class Instances extends Component {
 
   handleBP(e) {this.setState({BP: !this.state.BP})}
   handleDB(e) {this.setState({DB: !this.state.DB})}
+  handletestEnv(e) {this.setState({testEnv: !this.state.testEnv})}
   handleAddArtifacts(e) {this.setState({AddArtifacts: !this.state.AddArtifacts})}
 
   /**
@@ -108,7 +112,8 @@ export class Instances extends Component {
         sonarqube_profile: {value: this.state.selectedQualityGate.value, type: "String"}, //input
         sonarqube_url: {value: this.props.servers.sonarqubeServer, type: "String"},
 
-        test_environment: {value: this.test_environment.checked, type: "Boolean"}, //input
+        test_environment_url: (this.state.testEnv ? {value: this.props.servers.dockerServer, type: "String"} : undefined), //input
+        camunda_url: {value: this.props.servers.camundaServer, type: "String"}
       }
     }
 
@@ -199,6 +204,7 @@ export class Instances extends Component {
         }
         
         <h1>Instances</h1>
+        {/* <SoftwareComponents camundaServer={this.props.servers.camundaServer} /><br /> */}
         <Running camundaServer={this.props.servers.camundaServer} /><br />
         
         <div>
@@ -316,11 +322,13 @@ export class Instances extends Component {
               <div className="form-group">
                 <label>Select a SonarQube Quality Gate</label>
                 <Select
+                  name="sonarqube_profile" 
                   id="sonarqube_profile" 
+                  required
                   value={this.state.selectedQualityGate}
                   onChange={this.handleSQChange}
                   options={getQualityGates}
-                  searchable={false}
+                  //searchable={false} //< should be true because required is not working otherwise
                 />
               </div>
             }
@@ -338,7 +346,7 @@ export class Instances extends Component {
             <div className="form-group">
               <div className="form-check">
                 <label className="form-check-label">
-                  <input type="checkbox" className="form-check-input" ref={(input) => this.test_environment = input} name="test_environment"/>
+                  <input type="checkbox" className="form-check-input" onChange={this.handletestEnv} checked={this.state.testEnv} />
                   Create Test Environment
                 </label>
               </div>

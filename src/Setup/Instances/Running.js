@@ -35,6 +35,7 @@ export class Running extends Component {
       this.setState({updateTimer: 60000});
     }
 
+    // Update the Arrays every 3.5 Seconds
     TimerMixin.setInterval(
       () => { 
         this.getProcessDefinitions();
