@@ -1,6 +1,9 @@
 # NTPT React Frontend
 
-This frontend will be used to connect to the NTPT Server Component and start instances within a GUI. Code is written in [React.js](https://reactjs.org/) and [ES6](http://es6-features.org/)
+This Project is part of my Bachelor Thesis and represents the Frontend. It will connect to [NTPT Server](https://github.com/stegerpa/ntpt_camunda_server) using its REST-API and to the [Docker Containers](https://github.com/stegerpa/ntpt_docker_compose). Code is written in [React.js](https://reactjs.org/) and [ES6](http://es6-features.org/)
+
+<img width="345" alt="github_architecture" src="https://user-images.githubusercontent.com/18348827/35306698-76b69086-009f-11e8-8af2-f979e6c8eaa7.png">
+
 
 ## Start Development Server
 Make sure [NodeJS](https://nodejs.org/en/) is installed on your machine.
