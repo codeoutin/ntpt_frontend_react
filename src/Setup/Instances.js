@@ -23,6 +23,8 @@ export class Instances extends Component {
       selectedProject: '',
       selectedCommit: '',
       selectedQualityGate: '',
+      test_environment_dockerimage: '',
+      test_environment_dockerport: '',
       camundaEngine: [],
       BP: false,
       DB: false,
@@ -35,6 +37,9 @@ export class Instances extends Component {
     this.handletestEnv = this.handletestEnv.bind(this);
     this.handleAddArtifacts = this.handleAddArtifacts.bind(this);
     this.handleBranchNameChange = this.handleBranchNameChange.bind(this);
+    this.handleDockerImageChange = this.handleDockerImageChange.bind(this);
+    this.handleDockerPortChange = this.handleDockerPortChange.bind(this);
+    this.addDockerHelloWorld = this.addDockerHelloWorld.bind(this);
     //this.changeProject = this.changeProject.bind(this);
   }
 
@@ -111,8 +116,12 @@ export class Instances extends Component {
 
         sonarqube_profile: {value: this.state.selectedQualityGate.value, type: "String"}, //input
         sonarqube_url: {value: this.props.servers.sonarqubeServer, type: "String"},
+        sonarqube_token: {value: this.props.servers.sonarqubeToken, type: "String"},
 
         test_environment_url: (this.state.testEnv ? {value: this.props.servers.dockerServer, type: "String"} : undefined), //input
+        test_environment_dockerimage: (this.state.testEnv ? {value: this.state.test_environment_dockerimage, type: "String"} : undefined), //input
+        test_environment_dockerport: (this.state.testEnv ? {value: this.state.test_environment_dockerport, type: "String"} : undefined), //input
+        
         camunda_url: {value: this.props.servers.camundaServer, type: "String"}
       }
     }
@@ -148,6 +157,14 @@ export class Instances extends Component {
     this.setState({git_branch_name: e.target.value.replace(/[^a-zA-Z0-9.]/,'')}); //only alphanumeric symbols, no spaces
   }
 
+  handleDockerImageChange = (e) => {
+    this.setState({test_environment_dockerimage: e.target.value.replace(/[\s]/,'')}); //no spaces
+  }
+  
+  handleDockerPortChange = (e) => {
+    this.setState({test_environment_dockerport: e.target.value.replace(/[^-\d]/,'')}); //no spaces
+  }
+
   /**
    * Everytime a user changes the project we need to get the new Branches / Commits for this Project
    */
@@ -166,6 +183,15 @@ export class Instances extends Component {
 
   handleSQChange = (selectedQualityGate) => {
     this.setState({ selectedQualityGate });
+  }
+
+  addDockerHelloWorld() {
+    this.setState(
+      {
+        test_environment_dockerimage: 'crccheck/hello-world',
+        test_environment_dockerport: '8000'
+      }
+    )
   }
 
   render() {
@@ -204,8 +230,8 @@ export class Instances extends Component {
         }
         
         <h1>Instances</h1>
-        {/* <SoftwareComponents camundaServer={this.props.servers.camundaServer} /><br /> */}
-        <Running camundaServer={this.props.servers.camundaServer} /><br />
+        <SoftwareComponents camundaServer={this.props.servers.camundaServer} />
+        <Running camundaServer={this.props.servers.camundaServer} />
         
         <div>
           <legend>Request new Instance</legend>
@@ -351,6 +377,31 @@ export class Instances extends Component {
                 </label>
               </div>
             </div>
+
+            { this.state.testEnv &&
+              <div>
+                <div className="form-group">
+                  <label className="control-label">Docker Image</label>
+                  <div className="controls">
+                    <input type="text" key="test_environment_dockerimage" onChange={this.handleDockerImageChange} required className="form-control"
+                      name="test_environment_dockerimage" placeholder="Docker Image" value={this.state.test_environment_dockerimage}/>
+                    <small className="form-text text-muted">You can use your own image, import a new one from <a 
+                      href="https://hub.docker.com/explore/" target="_blank">DockerHub</a> or <a
+                      href="#" onClick={this.addDockerHelloWorld}>use Hello-World</a>
+                    </small>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="control-label">Image Host Port</label>
+                  <div className="controls">
+                    <input type="text" key="test_environment_dockerport" onChange={this.handleDockerPortChange} required className="form-control"
+                      name="test_environment_dockerport" placeholder="Host Port" value={this.state.test_environment_dockerport} maxLength="4" />
+                    <small className="form-text text-muted">The default Port the Container is Using. We will map this Port to the Range 8010+ for you!</small>
+                  </div>
+                </div>
+              </div>
+            }
             
             {/* Additional Artifacts */}
             <div className="form-group">
@@ -377,7 +428,7 @@ export class Instances extends Component {
             { this.state.gitProjects.length === 0 &&
               <p className="text-danger">GitLab Server is offline!</p>
             }
-            <button disabled={this.state.gitCommits.length === 0} type="submit" className="btn btn-primary">Create Instance</button>
+            <button disabled={this.state.gitCommits.length === 0} type="submit" className="btn btn-primary">Create Instance</button><br /><br />
           </form>
         </div>
 

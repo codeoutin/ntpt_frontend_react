@@ -13,10 +13,11 @@ export class Servers extends Component {
         this.state = {
             jenkinsServer: (this.props.servers.jenkinsServer !== "null" ? this.props.servers.jenkinsServer : "") ,
             gitlabServer: (this.props.servers.gitlabServer !== "null" ? this.props.servers.gitlabServer : ""),
+            gitlabToken: (this.props.servers.gitlabToken !== "null" ? this.props.servers.gitlabToken : ""),
             mongodbServer: (this.props.servers.mongodbServer !== "null" ? this.props.servers.mongodbServer : ""),
             sonarqubeServer: (this.props.servers.sonarqubeServer !== "null" ? this.props.servers.sonarqubeServer : ""),
+            sonarqubeToken: (this.props.servers.sonarqubeToken !== "null" ? this.props.servers.sonarqubeToken : ""),
             dockerServer: (this.props.servers.dockerServer !== "null" ? this.props.servers.dockerServer : ""),
-            gitlabToken: (this.props.servers.gitlabToken !== "null" ? this.props.servers.gitlabToken : ""),
 
             jenkinsTestSuccess: false,
             gitlabTestSuccess: false,
@@ -31,6 +32,7 @@ export class Servers extends Component {
         this.changeGitlabToken = this.changeGitlabToken.bind(this);
         this.changeMongodbServer = this.changeMongodbServer.bind(this);
         this.changeSonarqubeServer = this.changeSonarqubeServer.bind(this);
+        this.changeSonarqubeToken = this.changeSonarqubeToken.bind(this);
         this.changeDockerServer = this.changeDockerServer.bind(this);
         
         this.checkJenkinsConnection = this.checkJenkinsConnection.bind(this);
@@ -63,6 +65,11 @@ export class Servers extends Component {
     changeSonarqubeServer(e) {
         this.setState({sonarqubeServer: e.target.value});
         this.props.changeSonarqubeServer(e);
+    }
+    
+    changeSonarqubeToken(e) {
+        this.setState({sonarqubeToken: e.target.value});
+        this.props.changeSonarqubeToken(e);
     }
 
     changeDockerServer(e) {
@@ -182,168 +189,163 @@ export class Servers extends Component {
         });
     }
 
-    authenticateUser(username, password) {
-        var token = password + ":" + password;
-        var hash = btoa(token);
-        return "Basic " + hash;
-    }
-
     renderApiServers() {
         return (
             <form onSubmit={this.props.saveConnection}>
                 <fieldset>
-                    <legend>Required Servers</legend>
-
                     {/* Jenkins */}
                     <div className="form-group">
-                        <label>
-                            Jenkins Server &nbsp;
-                            <button 
-                                type="button" 
-                                disabled={!this.state.jenkinsServer}
-                                onClick={this.checkJenkinsConnection} 
-                                className="btn btn-sm btn-warning">Test Connection
-                            </button> &nbsp;
-                            <button
-                                type="button"
-                                disabled={!this.state.jenkinsServer}
-                                onClick={() => window.open("http://"+this.state.jenkinsServer)}
-                                className="btn btn-sm btn-info">Visit
-                            </button>
-                        </label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="jenkinsServer" 
-                            id="inputJenkinsServer" 
-                            defaultValue={this.state.jenkinsServer} 
-                            placeholder="Jenkins Server URL" 
-                            onChange={this.changeJenkinsServer} />
-                        <small className="form-text text-muted">Default Port: 8001</small>
+                        <legend><a href={'http://'+this.state.jenkinsServer}>Jenkins Server</a></legend>
+                        <div className="input-group">
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">http://</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="jenkinsServer" 
+                                id="inputJenkinsServer" 
+                                defaultValue={this.state.jenkinsServer} 
+                                placeholder="Jenkins Server URL" 
+                                onChange={this.changeJenkinsServer} />
+                            <div className="input-group-append">
+                                <button 
+                                    type="button" 
+                                    disabled={!this.state.jenkinsServer}
+                                    onClick={this.checkJenkinsConnection} 
+                                    className="btn btn-outline-secondary">Test Connection
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* GitLab */}
                     <div className="form-group">
-                        <label>
-                            Gitlab Server &nbsp;
-                            <button 
-                                type="button"
-                                disabled={!this.state.gitlabServer && !this.state.gitlabToken}
-                                onClick={this.checkGitlabConnection} 
-                                className="btn btn-sm btn-warning">Test Connection
-                            </button> &nbsp;
-                            <button
-                                type="button"
-                                disabled={!this.state.gitlabServer}
-                                onClick={() => window.open("http://"+this.state.gitlabServer)}
-                                className="btn btn-sm btn-info">Visit
-                            </button>
-                        </label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="gitlabServer" 
-                            id="inputGitlabServer" 
-                            defaultValue={this.state.gitlabServer} 
-                            placeholder="GitLab Server URL" 
-                            onChange={this.changeGitlabServer} 
-                        />
-                        <small className="form-text text-muted">Default Port: 8002</small>
-                        <br />
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="gitlabToken"
-                            id="inputGitlabToken" 
-                            defaultValue={this.state.gitlabToken} 
-                            placeholder="Personal Access Token" 
-                            onChange={this.changeGitlabToken} 
-                        />
-                        <small className="form-text text-muted">GitLab Personal Access Token. If you need help <a href="https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html" target="_blank" rel="noopener noreferrer">read the docs</a>.</small>
+                        <legend><a href={'http://'+this.state.gitlabServer}>Gitlab Server</a></legend>
+                        <div className="input-group">
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">http://</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="gitlabServer" 
+                                id="inputGitlabServer" 
+                                defaultValue={this.state.gitlabServer} 
+                                placeholder="GitLab Server URL" 
+                                onChange={this.changeGitlabServer} />
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="gitlabToken"
+                                id="inputGitlabToken" 
+                                defaultValue={this.state.gitlabToken} 
+                                placeholder="Personal Access Token" 
+                                onChange={this.changeGitlabToken} />
+                            <div className="input-group-append">
+                                <button 
+                                    type="button"
+                                    disabled={!this.state.gitlabServer && !this.state.gitlabToken}
+                                    onClick={this.checkGitlabConnection} 
+                                    className="btn btn-outline-secondary">Test Connection
+                                </button>
+                            </div>
+                        </div>
+                        <small className="form-text text-muted">GitLab Personal Access Token. If you need help <a
+                            href="https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html" 
+                            target="_blank" rel="noopener noreferrer">read the docs</a>.
+                        </small>
                     </div>
 
                     {/* MongoDB */}
                     <div className="form-group">
-                        <label>MongoDB Server &nbsp;
-                            <button 
-                                type="button"
-                                disabled={!this.state.mongodbServer}
-                                onClick={this.checkMongodbConnection} 
-                                className="btn btn-sm btn-warning">Test Connection
-                            </button> &nbsp;
-                            <button
-                                type="button"
-                                disabled={!this.state.mongodbServer}
-                                onClick={() => window.open("http://"+this.state.mongodbServer)}
-                                className="btn btn-sm btn-info">Visit
-                            </button>
-                        </label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="mongodbServer" 
-                            id="inputMongoDBServer" 
-                            defaultValue={this.state.mongodbServer} 
-                            placeholder="MongoDB Server URL" 
-                            onChange={this.changeMongodbServer} 
-                        />
-                        <small className="form-text text-muted">Default Port: 8003</small>
+                        <legend><a href={'http://'+this.state.mongodbServer}>MongoDB Server</a></legend>
+                        <div className="input-group">
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">http://</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="mongodbServer" 
+                                id="inputMongoDBServer" 
+                                defaultValue={this.state.mongodbServer} 
+                                placeholder="MongoDB Server URL" 
+                                onChange={this.changeMongodbServer} />
+                            <div className="input-group-append">
+                                <button 
+                                    type="button"
+                                    disabled={!this.state.mongodbServer}
+                                    onClick={this.checkMongodbConnection} 
+                                    className="btn btn-outline-secondary">Test Connection
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* SonarQube */}
                     <div className="form-group">
-                        <label>SonarQube Server &nbsp;
-                            <button 
-                                type="button" 
-                                disabled={!this.state.sonarqubeServer}
-                                onClick={this.checkSonarqubeConnection} 
-                                className="btn btn-sm btn-warning">Test Connection
-                            </button> &nbsp;
-                            <button
-                                type="button"
-                                disabled={!this.state.sonarqubeServer}
-                                onClick={() => window.open("http://"+this.state.sonarqubeServer)}
-                                className="btn btn-sm btn-info">Visit
-                            </button>
-                        </label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="sonarqubeServer" 
-                            id="inputSonarqubeServer" 
-                            defaultValue={this.state.sonarqubeServer} 
-                            placeholder="SonarQube Server URL" 
-                            onChange={this.changeSonarqubeServer} 
-                        />
-                        <small className="form-text text-muted">Default Port: 8004</small>
+                        <legend><a href={'http://'+this.state.sonarqubeServer}>SonarQube Server</a></legend>
+                        <div className="input-group">
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">http://</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="sonarqubeServer" 
+                                id="inputSonarqubeServer" 
+                                defaultValue={this.state.sonarqubeServer} 
+                                placeholder="SonarQube Server URL" 
+                                onChange={this.changeSonarqubeServer} />
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="sonarqubeToken"
+                                id="inputSonarqubeToken" 
+                                defaultValue={this.state.sonarqubeToken} 
+                                placeholder="User Token" 
+                                onChange={this.changeSonarqubeToken} />
+                            <div className="input-group-append">
+                                <button 
+                                    type="button" 
+                                    disabled={!this.state.sonarqubeServer}
+                                    onClick={this.checkSonarqubeConnection} 
+                                    className="btn btn-outline-secondary">Test Connection
+                                </button>
+                            </div>
+                        </div>
+                        <small className="form-text text-muted">SonarQube User Token. If you need help <a
+                            href="https://docs.sonarqube.org/display/SONAR/User+Token" 
+                            target="_blank" rel="noopener noreferrer">read the docs</a>.
+                        </small>
                     </div>
 
                     {/* Docker */}
                     <div className="form-group">
-                        <label>Docker API Server &nbsp;
-                            <button 
-                                type="button" 
-                                disabled={!this.state.dockerServer}
-                                onClick={this.checkDockerConnection} 
-                                className="btn btn-sm btn-warning">Test Connection
-                            </button> &nbsp;
-                            <button
-                                type="button"
-                                disabled={!this.state.dockerServer}
-                                onClick={() => window.open("http://"+this.state.dockerServer)}
-                                className="btn btn-sm btn-info">Visit
-                            </button>
-                        </label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="dockerServer" 
-                            id="inputDockerServer" 
-                            defaultValue={this.state.dockerServer} 
-                            placeholder="Docker API Server URL" 
-                            onChange={this.changeDockerServer} 
-                        />
-                        <small className="form-text text-muted">Default Port: 4550</small>
+                        <legend><a href={'http://'+this.state.dockerServer}>Docker API Server</a></legend>
+                        <div className="input-group">
+                            
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">http://</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                name="dockerServer" 
+                                id="inputDockerServer" 
+                                defaultValue={this.state.dockerServer} 
+                                placeholder="Docker API Server URL" 
+                                onChange={this.changeDockerServer} />
+                            <div className="input-group-append">
+                                <button 
+                                    type="button" 
+                                    disabled={!this.state.dockerServer}
+                                    onClick={this.checkDockerConnection} 
+                                    className="btn btn-outline-secondary">Test Connection
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Submit */}

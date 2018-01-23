@@ -20,6 +20,7 @@ export class Running extends Component {
       camundaUrl: 'http://' + this.props.camundaServer,
     }
     this.getProcessDefinitions = this.getProcessDefinitions.bind(this);
+    this.resetFailedConnections = this.resetFailedConnections.bind(this);
   }
 
   /**
@@ -31,17 +32,14 @@ export class Running extends Component {
     this.getRunningTasks();    
     this.getBranchNames();
 
-    if(this.state.failedConnections > 10) {
-      this.setState({updateTimer: 60000});
-    }
-
     // Update the Arrays every 3.5 Seconds
     TimerMixin.setInterval(
       () => { 
-        this.getProcessDefinitions();
-        this.getRunningTasks();
-        this.getBranchNames();
-        //console.log("tick");
+        if(this.state.failedConnections < 10) {
+          this.getProcessDefinitions();
+          this.getRunningTasks();
+          this.getBranchNames();
+        }
       },
       this.state.updateTimer // 3.5 Seconds
     );
@@ -112,9 +110,30 @@ export class Running extends Component {
     return name;
   }
 
+  /**
+   * Reset Failed Connections
+   */
+  resetFailedConnections() {
+    this.setState({failedConnections: 0});
+    console.log("Failed connections set back to 0");
+  }
+
   render() {
     return (
       <div>
+        {this.state.failedConnections === 10 &&
+          <div>
+            <p>Auto Update disabled (Too many failed Connections)&nbsp;
+              <button 
+                  type="button"
+                  onClick={this.resetFailedConnections} 
+                  className="btn btn-sm btn-info">Enable Auto-Update
+              </button>
+            </p>
+          </div>
+        }
+
+
         {this.state.runningTasks.length > 0 &&
           <div>
             <legend>User Tasks ({this.state.runningTasks.length})</legend>
@@ -159,7 +178,7 @@ export class Running extends Component {
               )}
             </div>
           </div>
-        }
+        } <br />
       </div>
     )
   }

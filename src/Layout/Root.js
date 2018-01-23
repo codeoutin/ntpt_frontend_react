@@ -20,9 +20,10 @@ export class Root extends Component {
             camundaServer: localStorage.getItem('camundaServer'),
             jenkinsServer: localStorage.getItem('jenkinsServer'),
             gitlabServer: localStorage.getItem('gitlabServer'),
+            gitlabToken: localStorage.getItem('gitlabToken'),
             mongodbServer: localStorage.getItem('mongodbServer'),
             sonarqubeServer: localStorage.getItem('sonarqubeServer'),
-            gitlabToken: localStorage.getItem('gitlabToken'),
+            sonarqubeToken: localStorage.getItem('sonarqubeToken'),
             dockerServer: localStorage.getItem('dockerServer'),
             menuItems: [
                 {link: "/camunda-server",  name: "Camunda Server"},
@@ -37,6 +38,7 @@ export class Root extends Component {
         this.changeGitlabToken = this.changeGitlabToken.bind(this);
         this.changeMongodbServer = this.changeMongodbServer.bind(this);
         this.changeSonarqubeServer = this.changeSonarqubeServer.bind(this);
+        this.changeSonarqubeToken = this.changeSonarqubeToken.bind(this);
         this.changeDockerServer = this.changeDockerServer.bind(this);
         this.saveConnection = this.saveConnection.bind(this);
     }
@@ -62,6 +64,9 @@ export class Root extends Component {
     changeSonarqubeServer(e) {
         this.setState({sonarqubeServer: e.target.value.replace(/^(https?:|)\/\//,'')})
     }
+    changeSonarqubeToken(e) {
+        this.setState({sonarqubeToken: e.target.value})
+    }
     changeDockerServer(e) {
         this.setState({dockerServer: e.target.value.replace(/^(https?:|)\/\//,'')})
     }
@@ -76,9 +81,10 @@ export class Root extends Component {
         localStorage.setItem('camundaServer', this.state.camundaServer);
         localStorage.setItem('jenkinsServer', this.state.jenkinsServer);
         localStorage.setItem('gitlabServer', this.state.gitlabServer);
+        localStorage.setItem('gitlabToken', this.state.gitlabToken);
         localStorage.setItem('mongodbServer', this.state.mongodbServer);
         localStorage.setItem('sonarqubeServer', this.state.sonarqubeServer);
-        localStorage.setItem('gitlabToken', this.state.gitlabToken);
+        localStorage.setItem('sonarqubeToken', this.state.sonarqubeToken);
         localStorage.setItem('dockerServer', this.state.dockerServer);
         this.refs.alert.generateAlert("Success", "Your data has been saved.", "success")
     }
@@ -102,6 +108,7 @@ export class Root extends Component {
             changeGitlabToken={this.changeGitlabToken.bind(this)}
             changeMongodbServer={this.changeMongodbServer.bind(this)}
             changeSonarqubeServer={this.changeSonarqubeServer.bind(this)}
+            changeSonarqubeToken={this.changeSonarqubeToken.bind(this)}
             changeDockerServer={this.changeDockerServer.bind(this)}
             saveConnection={this.saveConnection.bind(this)}
             

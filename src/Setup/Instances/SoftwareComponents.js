@@ -50,7 +50,7 @@ export class SoftwareComponents extends Component {
    * Get Exectuions
    */
   getExecutions() {
-    fetch(this.state.camundaUrl + '/rest/execution/')
+    fetch(this.state.camundaUrl + '/rest/history/process-instance?unfinished=true')
     .then(result => result.json())
     .then(exectuions => this.setState({exectuions}))
     .catch(error => {
@@ -92,28 +92,65 @@ export class SoftwareComponents extends Component {
         {this.state.taskVariables.length > 0 &&
           <div>
             <legend>Software Components</legend>
-            {this.state.exectuions.map(execution=>
+            {this.state.exectuions.map((execution, index) =>
               <div key={execution.key}>
-                <h5>Applications Stack</h5>
-                {this.state.taskVariables.map(task=>{
-                  if(execution.id === task.activityInstanceId) {
-                    console.log(task.value);
-                    if(task.name === "git_branch_name") {
-                      return (
-                        <p>Git Branch: <a href="#" onClick={() => getGitBranchUrl(task.git_url, task.git_project, task.git_branch, task.git_token)}>{task.value}</a></p>
-                      )
-                    }
-                    if(task.name === "git_branch_name") {
-                      return (
-                        <p>{task.value}</p>
-                      )
-                    }
-                  }
-                })}
+
+                <div className="card">
+                  <div className="card-header bg-light" id={`heading${execution.id}`}>
+                    <a data-toggle="collapse" className="text-dark" href={`#${execution.id}`} aria-expanded="true" aria-controls={execution.keyid}>
+                      Instance {execution.id}
+                      <span className="float-right">
+                        Created {moment(execution.startTime).fromNow()}
+                      </span>
+                    </a>                    
+                  </div>
+                  <div id={execution.id} className="collapse" role="tabpanel" aria-labelledby={`heading${execution.id}`} data-parent="#executions">
+                    <ul className="list-group list-group-flush">
+                      {this.state.taskVariables.map(task=>{
+                        if(execution.id === task.activityInstanceId) {
+                          console.log(task.value);
+                          if(task.name === "return_git") {
+                            return (
+                              <li className="list-group-item"><span className="font-weight-bold">Git Branch:</span> <a href={JSON.parse(task.value).branch_url}>{JSON.parse(task.value).branch_name}</a></li>
+                            )
+                          }
+                          if(task.name === "return_database") {
+                            return (
+                              <li className="list-group-item"><span className="font-weight-bold">Database:</span> <a href={JSON.parse(task.value).database_url}>{JSON.parse(task.value).database_name}</a></li>
+                            )
+                          }
+                          if(task.name === "return_docker") {
+                            return (
+                              <li className="list-group-item"><span className="font-weight-bold">Test Environment:</span> <a href={JSON.parse(task.value).container_url}>
+                                {JSON.parse(task.value).container_url}
+                                </a> (Image: <a href={JSON.parse(task.value).image_url}>{JSON.parse(task.value).image}</a>)</li>
+                            )
+                          }
+                          if(task.name === "return_bp") {
+                            return (
+                              <li className="list-group-item"><span className="font-weight-bold">Build Pipeline:</span> <ul>
+                                {JSON.parse(task.value).map((obj, index) => 
+                                    <li key={index}>{obj.id}: {obj.value}</li>
+                                )}
+                              </ul></li>
+                            )
+                          }
+                          if(task.name === "return_sonarqube") {
+                            return (
+                              <li className="list-group-item"><span className="font-weight-bold">SonarQube:</span> <a href={JSON.parse(task.value).path}>{JSON.parse(task.value).project_name}</a></li>
+                            )
+                          }
+                        }
+                      })}
+                    </ul>
+                  </div>
+                </div>
+
+                
               </div>
             )}
           </div>
-        }
+        } <br />
       </div>
     )
   }
