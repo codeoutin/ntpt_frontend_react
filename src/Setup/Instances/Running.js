@@ -136,6 +136,7 @@ export class Running extends Component {
 
         {this.state.runningTasks.length > 0 &&
           <div>
+            <br />
             <legend>User Tasks ({this.state.runningTasks.length})</legend>
             <div id="instances" role="tablist">
               {this.state.processDefinitions.map(definition=>
@@ -176,9 +177,9 @@ export class Running extends Component {
                   }
                 </div>
               )}
-            </div>
+            </div> <br />
           </div>
-        } <br />
+        }
       </div>
     )
   }

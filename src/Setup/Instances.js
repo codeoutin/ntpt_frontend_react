@@ -387,7 +387,7 @@ export class Instances extends Component {
                       name="test_environment_dockerimage" placeholder="Docker Image" value={this.state.test_environment_dockerimage}/>
                     <small className="form-text text-muted">You can use your own image, import a new one from <a 
                       href="https://hub.docker.com/explore/" target="_blank">DockerHub</a> or <a
-                      href="#" onClick={this.addDockerHelloWorld}>use Hello-World</a>
+                      href="#hello-world" onClick={this.addDockerHelloWorld}>use Hello-World</a>
                     </small>
                   </div>
                 </div>

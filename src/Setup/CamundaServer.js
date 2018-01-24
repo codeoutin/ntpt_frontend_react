@@ -58,30 +58,41 @@ export class CamundaServer extends Component {
         });
     }
 
-    authenticateUser(username, password) {
-        var token = password + ":" + password;
-        var hash = btoa(token);
-        return "Basic " + hash;
-    }
+    // authenticateUser(username, password) {
+    //     var token = password + ":" + password;
+    //     var hash = btoa(token);
+    //     return "Basic " + hash;
+    // }
 
 
     renderCamundaSetup(props) {
         return (
             <form onSubmit={this.props.saveConnection} autoComplete="off">
                 <fieldset>
-                    <legend>Camunda Server</legend>
                     <div className="form-group">
-                        <p>First you have to connect to the Camunda Server</p>
-                        <label>Server-Adress</label>
-                        <input 
-                            type="text" 
-                            name="camundaServer" 
-                            className="form-control" 
-                            id="inputCamundaServer" 
-                            onChange={this.changeCamundaServer} 
-                            placeholder="Camunda Server URL"
-                            defaultValue={this.state.camundaServer || ""} />
-                        <small id="camundaServerHelp" className="form-text text-muted">Make sure the server is running.</small>
+                        <legend><a href={'http://'+this.state.camundaServer}>Camunda Server</a></legend>
+                        <p>First you have to connect to the Backend, that is hosting a Camunda Server and the corresponding Models.</p>
+                        <div className="input-group">
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">http://</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                name="camundaServer" 
+                                className="form-control" 
+                                id="inputCamundaServer" 
+                                onChange={this.changeCamundaServer} 
+                                placeholder="Jenkins Server URL" 
+                                defaultValue={this.state.camundaServer || ""} />
+                            <div className="input-group-append">
+                                <button 
+                                    type="button" 
+                                    disabled={!this.state.camundaServer}
+                                    onClick={this.checkConnection} 
+                                    className="btn btn-outline-secondary">Test Connection
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="form-group">
@@ -101,12 +112,10 @@ export class CamundaServer extends Component {
                         </div>
                         <div className="form-group">
                             <label>Password</label>
-                            <input type="text" name="password" className="form-control" id="inputCamundaPw" defaultValue={this.state.password} onChange={this.handleChange} />
+                            <input type="password" name="password" className="form-control" id="inputCamundaPw" defaultValue={this.state.password} onChange={this.handleChange} />
                         </div>
                     </div> }
 
-                    <button type="button" onClick={this.checkConnection} className="btn btn-warning">Test connection</button>
-                    <p></p>
                     <button type="submit" disabled={!this.state.test_success} className="btn btn-success">Save</button>
                 </fieldset>
             </form>

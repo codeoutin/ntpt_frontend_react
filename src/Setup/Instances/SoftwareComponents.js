@@ -50,7 +50,7 @@ export class SoftwareComponents extends Component {
    * Get Exectuions
    */
   getExecutions() {
-    fetch(this.state.camundaUrl + '/rest/history/process-instance?unfinished=true')
+    fetch(this.state.camundaUrl + '/rest/history/process-instance?unfinished=true&processDefinitionKey=TestBuildPipeline')
     .then(result => result.json())
     .then(exectuions => this.setState({exectuions}))
     .catch(error => {
@@ -130,7 +130,7 @@ export class SoftwareComponents extends Component {
                             return (
                               <li className="list-group-item"><span className="font-weight-bold">Build Pipeline:</span> <ul>
                                 {JSON.parse(task.value).map((obj, index) => 
-                                    <li key={index}>{obj.id}: {obj.value}</li>
+                                    <li key={index}>{obj.id}: <a href={obj.path}>{obj.value}</a></li>
                                 )}
                               </ul></li>
                             )
@@ -145,12 +145,10 @@ export class SoftwareComponents extends Component {
                     </ul>
                   </div>
                 </div>
-
-                
               </div>
             )}
           </div>
-        } <br />
+        }
       </div>
     )
   }

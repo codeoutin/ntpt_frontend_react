@@ -352,7 +352,7 @@ export class Servers extends Component {
                     <button 
                         type="submit" 
                         className="btn btn-success">Save
-                    </button>
+                    </button><br /><br />
                 </fieldset>
             </form>
         );
