@@ -1,9 +1,12 @@
 # NTPT React Frontend
 
-This Project is part of my Bachelor Thesis and represents the Frontend. It will connect to [NTPT Server](https://github.com/stegerpa/ntpt_camunda_server) using its REST-API and to the [Docker Containers](https://github.com/stegerpa/ntpt_docker_compose). Code is written in [React.js](https://reactjs.org/) and [ES6](http://es6-features.org/)
+NTPT React Frontend is part of my Bachelor Thesis.
 
-<img width="345" alt="github_architecture" src="https://user-images.githubusercontent.com/18348827/35306698-76b69086-009f-11e8-8af2-f979e6c8eaa7.png">
+<img width="423" alt="github_architecture" src="https://user-images.githubusercontent.com/18348827/35306966-c96738ca-00a0-11e8-8c0e-c8e3e097222d.png">
 
+The Frontend is basically a GUI, written in [React.js](https://reactjs.org/) and is used to fire a Camunda BPM Process, which generates Software Components. To setup the NTPT Project you also need
+* [Docker Containers](https://github.com/stegerpa/ntpt_docker_compose)
+*[NTPT Server](https://github.com/stegerpa/ntpt_camunda_server)
 
 ## Start Development Server
 Make sure [NodeJS](https://nodejs.org/en/) is installed on your machine.
