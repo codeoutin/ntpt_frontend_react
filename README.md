@@ -18,7 +18,7 @@ See https://github.com/facebook/create-react-app/blob/master/packages/react-scri
 `npm run build` creates a `build` directory with a production build of your app. Set up your favorite HTTP server so that a visitor to your site is served `index.html`, and requests to static paths like `/static/js/main.<hash>.js` are served with the contents of the `/static/js/main.<hash>.js` file.
 
 #### Static Server
-For environments that have [Node.js](https://nodejs.org/) installed, the easiest way would be to install [serve](https://github.com/zeit/serve) and let it handle the rest:
+For environments that have [Node.js](https://nodejs.org/) installed, use [serve](https://github.com/zeit/serve) and let it do its magic:
 
 ```sh
 npm install -g serve
