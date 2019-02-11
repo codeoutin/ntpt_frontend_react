@@ -82,7 +82,7 @@ export class CamundaServer extends Component {
                                 className="form-control" 
                                 id="inputCamundaServer" 
                                 onChange={this.changeCamundaServer} 
-                                placeholder="Jenkins Server URL" 
+                                placeholder="Camunda Server URL" 
                                 defaultValue={this.state.camundaServer || ""} />
                             <div className="input-group-append">
                                 <button 
