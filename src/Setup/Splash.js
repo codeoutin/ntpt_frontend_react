@@ -19,7 +19,7 @@ export const Splash = () => {
             </p>
             <hr />
             <p>
-                Developed by <a href="https://github.com/stegerpa/" target="_blank" rel="noopener noreferrer">Patrick Steger</a> for <a href="http://novatec-gmbh.de" target="_blank" rel="noopener noreferrer">NovaTec GmbH</a>
+                Developed by <a href="https://github.com/stegerpa/" target="_blank" rel="noopener noreferrer">Patrick Steger</a>
             </p>
         </div>
     );
