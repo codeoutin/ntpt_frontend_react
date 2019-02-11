@@ -70,12 +70,9 @@ export class CamundaServer extends Component {
             <form onSubmit={this.props.saveConnection} autoComplete="off">
                 <fieldset>
                     <div className="form-group">
-                        <legend><a href={'http://'+this.state.camundaServer}>Camunda Server</a></legend>
+                        <legend><a href={this.state.camundaServer}>Camunda Server</a></legend>
                         <p>First you have to connect to the Backend, that is hosting a Camunda Server and the corresponding Models.</p>
                         <div className="input-group">
-                            <div className="input-group-prepend">
-                                <span className="input-group-text">http://</span>
-                            </div>
                             <input 
                                 type="text" 
                                 name="camundaServer" 
